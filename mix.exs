@@ -39,7 +39,7 @@ defmodule CocktailsCoffee.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       # TODO bump on release to {:phoenix_live_view, "~> 1.0.0"},
-      {:phoenix_live_view, "~> 1.0.0-rc.1", override: true},
+      {:phoenix_live_view, "~> 1.0.0-rc.6", override: true},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
@@ -89,12 +89,12 @@ defmodule CocktailsCoffee.MixProject do
 
   def stop(_) do
     Mix.shell().cmd("pkill -f phx.server")
-    Mix.shell().cmd("tmex phoenix -k &>/dev/null")
+    Mix.shell().cmd("tmex phoenix -qk")
   end
 
   def start(_) do
     stop([])
-    Mix.shell().cmd("tmex phoenix -d 'mix phx.server' 1>/dev/null")
+    Mix.shell().cmd("tmex phoenix -qd 'mix phx.server'")
     Mix.shell().cmd("sleep 3")
     open([])
   end
