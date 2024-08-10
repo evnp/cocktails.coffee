@@ -2,9 +2,10 @@
 
 set -euo pipefail
 
-trap stop-loading INT
+trap "trap - SIGTERM && kill \$LOADING_PID &>/dev/null && echo -ne '\r\033[K'" \
+  SIGINT SIGTERM EXIT
 
-function start-loading-simple {
+function loading-simple {
   while true
   do
     echo -ne "$(
@@ -15,7 +16,7 @@ function start-loading-simple {
   done &
 }
 
-function start-loading { local fps cvrg dots cols alph shap orig rand mask repl
+function loading { local fps cvrg dots cols alph shap orig rand mask repl
   # Parse arguments: fps (integer), cvrg (boolean), dots (boolean)
   fps="$1"; ! [[ "${fps}" =~ ^[0-9]+$ ]] && \
     echo "start-loading: first argument (fps) must be an integer" && exit 1
@@ -44,28 +45,22 @@ function start-loading { local fps cvrg dots cols alph shap orig rand mask repl
 
     sleep "$( bc -l <<< "1/${fps}" )" # Sleep long enough to establish correct FPS.
   done &
-}
-
-function stop-loading {
-  kill $! &>/dev/null
-  echo -ne '\r\033[K'
+  export LOADING_PID="$!"
 }
 
 if (( $# > 0 ))
 then
   if ! [[ "$1" =~ ^[0-9]+$ ]]
   then
-    start-loading 30 "$@"
+    loading 30 "$@"
   else
-    start-loading "$@"
+    loading "$@"
   fi
 elif (( RANDOM % 2 ))
 then
-  start-loading 30 --converge
+  loading 30 --converge
 else
-  start-loading 60 --dots --converge
+  loading 60 --dots --converge
 fi
 
 mix start
-
-stop-loading
