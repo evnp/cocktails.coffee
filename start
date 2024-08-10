@@ -2,28 +2,69 @@
 
 set -euo pipefail
 
-function start-loading() {
-  local fps="$1"
+trap stop-loading INT
+
+function start-loading-simple {
   while true
   do
     echo -ne "$(
       LC_ALL=true tr -dc 'a-t' </dev/urandom \
       | head -c "$( tput cols )" \
-      | sed 'y/abcdefghijklmnopqrst/■▪▬▮▰◀◂▲▴▶▸◢◣◤◥◆▼●◖◗/'
+      | sed 'y/abcdefghijklmnopqrstuvwxyz/■ ▪ ▬ ▮ ◆ ◢ ◣ ◥ ◤ ●◗◖●◀▲▼▶/'
     )\r"
-    if (( fps > 0 ))
-    then
-      sleep "$( bc -l <<< "1/${fps}" )"
-    fi
   done &
 }
 
-function stop-loading() {
+function start-loading { local fps cvrg dots cols alph shap orig rand mask repl
+  # Parse arguments: fps (integer), cvrg (boolean), dots (boolean)
+  fps="$1"; ! [[ "${fps}" =~ ^[0-9]+$ ]] && \
+    echo "start-loading: first argument (fps) must be an integer" && exit 1
+  cvrg=FALSE; [[ " $* " == *' --converge '* ]] && cvrg=TRUE
+  dots=FALSE; [[ " $* " == *' --dots '* ]] && dots=TRUE
+
+  cols="$( tput cols )" # Record width (in char columns) of current terminal pane.
+  alph="$( echo {a..z} | tr -d ' ' )" # Construct full alphabet string, a-z.
+
+  shap="■ ▪ ▬ ▮ ◆ ◢ ◣ ◥ ◤ ●◗◖●◀▲▼▶" # Determine symbol alphabet.
+  [[ "${dots}" == TRUE ]] && shap=" $( printf ".·:⠇˙%.0s" {1..5} )"
+
+  # Construct a string of length matching width of terminal pane, random chars a-z:
+  orig="$( echo "$( LC_ALL=true tr -dc 'a-z' </dev/urandom | head -c "${cols}" )" )"
+  rand="${orig}"
+
+  while true
+  do # Pick 10 random chars from alphabet:
+    mask="$( echo "$( LC_ALL=true tr -dc 'a-z' </dev/urandom | head -c 10 )" )"
+    repl="$( rev <<< "${mask}" )" # Reverse mask to perform random swap of chars.
+
+    [[ "${cvrg}" != TRUE ]] && rand="${orig}" # If not converging, reset rand to orig.
+    rand="$( sed "y/${mask}/${repl}/" <<< "${rand}" )" # Perform random swap of chars.
+    echo -ne "$( sed "y/${alph}/${shap}/" <<< "${rand}" )\r"
+    # Print, replacing a-z chars with shapes, and overwriting last line of output.
+
+    sleep "$( bc -l <<< "1/${fps}" )" # Sleep long enough to establish correct FPS.
+  done &
+}
+
+function stop-loading {
   kill $! &>/dev/null
   echo -ne '\r\033[K'
 }
 
-start-loading 10
+if (( $# > 0 ))
+then
+  if ! [[ "$1" =~ ^[0-9]+$ ]]
+  then
+    start-loading 30 "$@"
+  else
+    start-loading "$@"
+  fi
+elif (( RANDOM % 2 ))
+then
+  start-loading 30 --converge
+else
+  start-loading 60 --dots --converge
+fi
 
 mix start
 
