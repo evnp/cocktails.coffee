@@ -70,9 +70,6 @@ defmodule CocktailsCoffee.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      stop: [&stop/1],
-      start: [&start/1],
-      open: [&open/1],
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
@@ -85,21 +82,5 @@ defmodule CocktailsCoffee.MixProject do
         "phx.digest"
       ]
     ]
-  end
-
-  def stop(_) do
-    Mix.shell().cmd("pkill -f phx.server")
-    Mix.shell().cmd("tmex phoenix -qk")
-  end
-
-  def start(_) do
-    stop([])
-    Mix.shell().cmd("tmex phoenix -qd 'mix phx.server'")
-    Mix.shell().cmd("sleep 3")
-    open([])
-  end
-
-  def open(_) do
-    Mix.shell().cmd("open http://localhost:4000")
   end
 end
