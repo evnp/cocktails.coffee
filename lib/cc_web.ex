@@ -1,12 +1,12 @@
-defmodule CocktailsCoffeeWeb do
+defmodule CCWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, components, channels, and so on.
 
   This can be used in your application as:
 
-      use CocktailsCoffeeWeb, :controller
-      use CocktailsCoffeeWeb, :html
+      use CCWeb, :controller
+      use CCWeb, :html
 
   The definitions below will be executed for every controller,
   component, etc, so keep them short and clean, focused
@@ -40,10 +40,10 @@ defmodule CocktailsCoffeeWeb do
     quote do
       use Phoenix.Controller,
         formats: [:html, :json],
-        layouts: [html: CocktailsCoffeeWeb.Layouts]
+        layouts: [html: CCWeb.Layouts]
 
       import Plug.Conn
-      import CocktailsCoffeeWeb.Gettext
+      import CCWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -52,7 +52,7 @@ defmodule CocktailsCoffeeWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {CocktailsCoffeeWeb.Layouts, :app}
+        layout: {CCWeb.Layouts, :app}
 
       unquote(html_helpers())
     end
@@ -84,8 +84,8 @@ defmodule CocktailsCoffeeWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
-      import CocktailsCoffeeWeb.CoreComponents
-      import CocktailsCoffeeWeb.Gettext
+      import CCWeb.CoreComponents
+      import CCWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
@@ -98,9 +98,9 @@ defmodule CocktailsCoffeeWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: CocktailsCoffeeWeb.Endpoint,
-        router: CocktailsCoffeeWeb.Router,
-        statics: CocktailsCoffeeWeb.static_paths()
+        endpoint: CCWeb.Endpoint,
+        router: CCWeb.Router,
+        statics: CCWeb.static_paths()
     end
   end
 

@@ -1,4 +1,4 @@
-defmodule CocktailsCoffeeWeb.Telemetry do
+defmodule CCWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
 
@@ -52,23 +52,23 @@ defmodule CocktailsCoffeeWeb.Telemetry do
       ),
 
       # Database Metrics
-      summary("cocktails_coffee.repo.query.total_time",
+      summary("cc.repo.query.total_time",
         unit: {:native, :millisecond},
         description: "The sum of the other measurements"
       ),
-      summary("cocktails_coffee.repo.query.decode_time",
+      summary("cc.repo.query.decode_time",
         unit: {:native, :millisecond},
         description: "The time spent decoding the data received from the database"
       ),
-      summary("cocktails_coffee.repo.query.query_time",
+      summary("cc.repo.query.query_time",
         unit: {:native, :millisecond},
         description: "The time spent executing the query"
       ),
-      summary("cocktails_coffee.repo.query.queue_time",
+      summary("cc.repo.query.queue_time",
         unit: {:native, :millisecond},
         description: "The time spent waiting for a database connection"
       ),
-      summary("cocktails_coffee.repo.query.idle_time",
+      summary("cc.repo.query.idle_time",
         unit: {:native, :millisecond},
         description:
           "The time the connection spent waiting before being checked out for the query"
@@ -86,7 +86,7 @@ defmodule CocktailsCoffeeWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {CocktailsCoffeeWeb, :count_users, []}
+      # {CCWeb, :count_users, []}
     ]
   end
 end

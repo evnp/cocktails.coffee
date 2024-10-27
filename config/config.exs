@@ -7,19 +7,19 @@
 # General application configuration
 import Config
 
-config :cocktails_coffee,
-  ecto_repos: [CocktailsCoffee.Repo],
+config :cc,
+  ecto_repos: [CC.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
-config :cocktails_coffee, CocktailsCoffeeWeb.Endpoint,
+config :cc, CCWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: CocktailsCoffeeWeb.ErrorHTML, json: CocktailsCoffeeWeb.ErrorJSON],
+    formats: [html: CCWeb.ErrorHTML, json: CCWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: CocktailsCoffee.PubSub,
+  pubsub_server: CC.PubSub,
   live_view: [signing_salt: "3RjZ46CH"]
 
 # Configures the mailer
@@ -29,12 +29,12 @@ config :cocktails_coffee, CocktailsCoffeeWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :cocktails_coffee, CocktailsCoffee.Mailer, adapter: Swoosh.Adapters.Local
+config :cc, CC.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
-  cocktails_coffee: [
+  cc: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
@@ -44,7 +44,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "3.4.3",
-  cocktails_coffee: [
+  cc: [
     args: ~w(
       --config=tailwind.config.js
       --input=css/app.css

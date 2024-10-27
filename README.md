@@ -1,4 +1,4 @@
-# CocktailsCoffee
+# CC
 
 To start your Phoenix server:
 

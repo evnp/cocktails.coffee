@@ -1,5 +1,5 @@
-defmodule CocktailsCoffeeWeb.PageControllerTest do
-  use CocktailsCoffeeWeb.ConnCase
+defmodule CCWeb.PageControllerTest do
+  use CCWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

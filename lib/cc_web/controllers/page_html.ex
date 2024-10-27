@@ -1,10 +1,10 @@
-defmodule CocktailsCoffeeWeb.PageHTML do
+defmodule CCWeb.PageHTML do
   @moduledoc """
   This module contains pages rendered by PageController.
 
   See the `page_html` directory for all templates available.
   """
-  use CocktailsCoffeeWeb, :html
+  use CCWeb, :html
 
   embed_templates "page_html/*"
 end

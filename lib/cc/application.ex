@@ -1,4 +1,4 @@
-defmodule CocktailsCoffee.Application do
+defmodule CC.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,21 +8,21 @@ defmodule CocktailsCoffee.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      CocktailsCoffeeWeb.Telemetry,
-      CocktailsCoffee.Repo,
-      {DNSCluster, query: Application.get_env(:cocktails_coffee, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: CocktailsCoffee.PubSub},
+      CCWeb.Telemetry,
+      CC.Repo,
+      {DNSCluster, query: Application.get_env(:cc, :dns_cluster_query) || :ignore},
+      {Phoenix.PubSub, name: CC.PubSub},
       # Start the Finch HTTP client for sending emails
-      {Finch, name: CocktailsCoffee.Finch},
-      # Start a worker by calling: CocktailsCoffee.Worker.start_link(arg)
-      # {CocktailsCoffee.Worker, arg},
+      {Finch, name: CC.Finch},
+      # Start a worker by calling: CC.Worker.start_link(arg)
+      # {CC.Worker, arg},
       # Start to serve requests, typically the last entry
-      CocktailsCoffeeWeb.Endpoint
+      CCWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: CocktailsCoffee.Supervisor]
+    opts = [strategy: :one_for_one, name: CC.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
@@ -30,7 +30,7 @@ defmodule CocktailsCoffee.Application do
   # whenever the application is updated.
   @impl true
   def config_change(changed, _new, removed) do
-    CocktailsCoffeeWeb.Endpoint.config_change(changed, removed)
+    CCWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

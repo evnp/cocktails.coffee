@@ -1,12 +1,12 @@
-defmodule CocktailsCoffeeWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :cocktails_coffee
+defmodule CCWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :cc
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_cocktails_coffee_key",
+    key: "_cc_key",
     signing_salt: "Wq019TbX",
     same_site: "Lax"
   ]
@@ -21,9 +21,9 @@ defmodule CocktailsCoffeeWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :cocktails_coffee,
+    from: :cc,
     gzip: false,
-    only: CocktailsCoffeeWeb.static_paths()
+    only: CCWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -31,7 +31,7 @@ defmodule CocktailsCoffeeWeb.Endpoint do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :cocktails_coffee
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :cc
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,
@@ -49,5 +49,5 @@ defmodule CocktailsCoffeeWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug CocktailsCoffeeWeb.Router
+  plug CCWeb.Router
 end

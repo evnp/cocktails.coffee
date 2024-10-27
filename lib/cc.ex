@@ -1,6 +1,6 @@
-defmodule CocktailsCoffee do
+defmodule CC do
   @moduledoc """
-  CocktailsCoffee keeps the contexts that define your domain
+  CC keeps the contexts that define your domain
   and business logic.
 
   Contexts are also responsible for managing your data, regardless

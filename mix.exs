@@ -1,9 +1,9 @@
-defmodule CocktailsCoffee.MixProject do
+defmodule CC.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :cocktails_coffee,
+      app: :cc,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule CocktailsCoffee.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {CocktailsCoffee.Application, []},
+      mod: {CC.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -75,10 +75,10 @@ defmodule CocktailsCoffee.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind cocktails_coffee", "esbuild cocktails_coffee"],
+      "assets.build": ["tailwind cc", "esbuild cc"],
       "assets.deploy": [
-        "tailwind cocktails_coffee --minify",
-        "esbuild cocktails_coffee --minify",
+        "tailwind cc --minify",
+        "esbuild cc --minify",
         "phx.digest"
       ]
     ]

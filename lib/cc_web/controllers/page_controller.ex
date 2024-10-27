@@ -1,5 +1,5 @@
-defmodule CocktailsCoffeeWeb.PageController do
-  use CocktailsCoffeeWeb, :controller
+defmodule CCWeb.PageController do
+  use CCWeb, :controller
 
   def home(conn, _params) do
     # The home page is often custom made,

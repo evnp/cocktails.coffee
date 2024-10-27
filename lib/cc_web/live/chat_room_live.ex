@@ -1,5 +1,5 @@
-defmodule CocktailsCoffeeWeb.ChatRoomLive do
-  use CocktailsCoffeeWeb, :live_view
+defmodule CCWeb.ChatRoomLive do
+  use CCWeb, :live_view
 
   def render(assigns) do
     ~H"""

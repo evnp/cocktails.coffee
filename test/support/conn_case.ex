@@ -1,4 +1,4 @@
-defmodule CocktailsCoffeeWeb.ConnCase do
+defmodule CCWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule CocktailsCoffeeWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use CocktailsCoffeeWeb.ConnCase, async: true`, although
+  by setting `use CCWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -20,19 +20,19 @@ defmodule CocktailsCoffeeWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      @endpoint CocktailsCoffeeWeb.Endpoint
+      @endpoint CCWeb.Endpoint
 
-      use CocktailsCoffeeWeb, :verified_routes
+      use CCWeb, :verified_routes
 
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import CocktailsCoffeeWeb.ConnCase
+      import CCWeb.ConnCase
     end
   end
 
   setup tags do
-    CocktailsCoffee.DataCase.setup_sandbox(tags)
+    CC.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
