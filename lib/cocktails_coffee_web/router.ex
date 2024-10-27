@@ -19,7 +19,7 @@ defmodule CocktailsCoffeeWeb.Router do
 
     get "/", PageController, :home
     get "/home", PageController, :home
-    live "/live", ChatRoomLive
+    live "/chat", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.
