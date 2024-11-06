@@ -52,7 +52,7 @@ defmodule CCWeb.ChatRoomLive do
         "flex items-center h-8 text-sm pl-8 pr-3",
         (if @active, do: "bg-slate-300", else: "hover:bg-slate-300")
       ]}
-      href="#"
+      href={~p"/rooms/#{@room}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
       <span class={["ml-2 leading-none", @active && "font-bold"]}>
@@ -62,7 +62,7 @@ defmodule CCWeb.ChatRoomLive do
     """
   end
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
       IO.puts("mounting (connected)")
     else
@@ -70,7 +70,11 @@ defmodule CCWeb.ChatRoomLive do
     end
 
     rooms = Room |> Repo.all()
-    room = rooms |> List.first()
+
+    room = case params |> Map.fetch("id") do
+      {:ok, id} -> Repo.get!(Room, id)
+      :error -> List.first(rooms)
+    end
 
     {:ok, socket
       |> assign(rooms: rooms)
