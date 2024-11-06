@@ -47,18 +47,18 @@ defmodule CCWeb.ChatRoomLive do
   attr :room, Room, required: true
   defp room_link(assigns) do
     ~H"""
-    <a
+    <.link
+      patch={~p"/rooms/#{@room}"}
       class={[
         "flex items-center h-8 text-sm pl-8 pr-3",
         (if @active, do: "bg-slate-300", else: "hover:bg-slate-300")
       ]}
-      href={~p"/rooms/#{@room}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
       <span class={["ml-2 leading-none", @active && "font-bold"]}>
         <%= @room.name %>
       </span>
-    </a>
+    </.link>
     """
   end
 
@@ -68,19 +68,15 @@ defmodule CCWeb.ChatRoomLive do
     else
       IO.puts("mounting (not connected)")
     end
+    {:ok, assign(socket, rooms: Repo.all(Room))}
+  end
 
-    rooms = Room |> Repo.all()
-
+  def handle_params(params, _session, socket) do
     room = case params |> Map.fetch("id") do
-      {:ok, id} -> Repo.get!(Room, id)
-      :error -> List.first(rooms)
+      {:ok, id} -> Room |> Repo.get!(id)
+      :error -> socket.assigns.rooms |> List.first()
     end
-
-    {:ok, socket
-      |> assign(rooms: rooms)
-      |> assign(room: room)
-      |> assign(hide_topic?: false)
-    }
+    {:noreply, assign(socket, hide_topic?: false, room: room)}
   end
 
   def handle_event("toggle-topic", _params, socket) do
