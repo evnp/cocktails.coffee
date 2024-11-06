@@ -19,8 +19,8 @@ defmodule CCWeb.Router do
 
     get "/", PageController, :home
     get "/home", PageController, :home
-    live "/chat", ChatRoomLive
     live "/rooms/:id", ChatRoomLive
+    live "/rooms", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.

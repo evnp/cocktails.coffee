@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
     <.live_title>
-      <%= assigns[:page_title] || "Cocktails.Coffee." %>
+      <%= "Cocktails.Coffee. " <> (assigns[:page_title] || "") %>
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2242 10 80 80%22><style>:root{filter:saturate(7)hue-rotate(-20deg)invert(75%)drop-shadow(4px 4px 8px orange)}</style><text y=%22.9em%22 font-size=%2290%22 letter-spacing=%22-20%22>🍸☕</text></svg>">

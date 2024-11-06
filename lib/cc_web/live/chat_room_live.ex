@@ -1,7 +1,7 @@
 defmodule CCWeb.ChatRoomLive do
   use CCWeb, :live_view
 
-  alias CC.Repo
+  alias CC.Chat
   alias CC.Chat.Room
 
   def render(assigns) do
@@ -62,21 +62,25 @@ defmodule CCWeb.ChatRoomLive do
     """
   end
 
-  def mount(params, _session, socket) do
+  def mount(_params, _session, socket) do
     if connected?(socket) do
       IO.puts("mounting (connected)")
     else
       IO.puts("mounting (not connected)")
     end
-    {:ok, assign(socket, rooms: Repo.all(Room))}
+    {:ok, assign(socket, rooms: Chat.list_rooms())}
   end
 
   def handle_params(params, _session, socket) do
     room = case params |> Map.fetch("id") do
-      {:ok, id} -> Room |> Repo.get!(id)
-      :error -> socket.assigns.rooms |> List.first()
+      {:ok, id} -> Chat.get_room!(id)
+      :error -> Chat.get_first_room!(socket.assigns.rooms)
     end
-    {:noreply, assign(socket, hide_topic?: false, room: room)}
+    {:noreply, socket
+      |> assign(room: room)
+      |> assign(hide_topic?: false)
+      |> assign(page_title: "Cocktails.Coffee. #" <> room.name)
+    }
   end
 
   def handle_event("toggle-topic", _params, socket) do
