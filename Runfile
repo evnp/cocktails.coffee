@@ -1,6 +1,6 @@
 start: kill # start application
   bash -c 'trap "loading fin" EXIT; loading; tmex phoenix -qd "mix phx.server"; sleep 5'
-  run client
+  run open
 
 kill: # kill application
   pkill -f phx.server || true # ignore errors
