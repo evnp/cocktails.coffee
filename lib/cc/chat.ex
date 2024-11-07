@@ -31,4 +31,8 @@ defmodule CC.Chat do
     |> Room.changeset(attrs)
     |> Repo.update()
   end
+
+  def get_room_changeset(room, attrs \\ %{}) do
+    Room.changeset(room, attrs)
+  end
 end

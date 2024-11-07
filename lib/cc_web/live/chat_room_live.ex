@@ -29,6 +29,12 @@ defmodule CCWeb.ChatRoomLive do
         <div class="flex flex-col gap-1.5">
           <h1 class="text-sm font-bold leading-none">
             #<%= @room.name %>
+            <.link
+              class="font-normal text-xs text-blue-600 hover:text-blue-700"
+              navigate={~p"/rooms/#{@room}/edit"}
+            >
+              <.icon name="hero-pencil" class="h-4 w-4 ml-1 -mt-2" />
+            </.link>
           </h1>
           <div class="text-xs leading-none h-3.5 cursor-pointer" phx-click="toggle-topic">
             <%= if @hide_topic? do %>
