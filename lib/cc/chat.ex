@@ -1,9 +1,10 @@
 defmodule CC.Chat do
   alias CC.Chat.Room
   alias CC.Repo
+  import Ecto.Query
 
   def list_rooms do
-    Repo.all(Room)
+    Repo.all(from r in Room, order_by: [asc: :name])
   end
 
   def get_room!(id) do
@@ -16,7 +17,6 @@ defmodule CC.Chat do
   end
 
   def get_first_room!() do
-    [room | _] = list_rooms()
-    room
+    Repo.one!(from r in Room, limit: 1, order_by: [asc: :name])
   end
 end
