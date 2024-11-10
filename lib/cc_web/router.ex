@@ -57,12 +57,12 @@ defmodule CCWeb.Router do
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{CCWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
+      live "/users/login", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 
-    post "/users/log_in", UserSessionController, :create
+    post "/users/login", UserSessionController, :create
   end
 
   scope "/", CCWeb do
@@ -78,7 +78,7 @@ defmodule CCWeb.Router do
   scope "/", CCWeb do
     pipe_through [:browser]
 
-    delete "/users/log_out", UserSessionController, :delete
+    delete "/users/logout", UserSessionController, :delete
 
     live_session :current_user,
       on_mount: [{CCWeb.UserAuth, :mount_current_user}] do
