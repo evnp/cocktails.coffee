@@ -1,5 +1,5 @@
 defmodule CC.Chat do
-  alias CC.Chat.Room
+  alias CC.Chat.{Room, Message}
   alias CC.Repo
   import Ecto.Query
 
@@ -34,5 +34,12 @@ defmodule CC.Chat do
 
   def get_room_changeset(room, attrs \\ %{}) do
     Room.changeset(room, attrs)
+  end
+
+  def list_messages_in_room(%Room{id: room_id}) do
+    Message
+    |> where([m], m.room_id == ^room_id)
+    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> Repo.all()
   end
 end

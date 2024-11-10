@@ -2,7 +2,7 @@ defmodule CCWeb.ChatRoomLive do
   use CCWeb, :live_view
 
   alias CC.Chat
-  alias CC.Chat.Room
+  alias CC.Chat.{Room, Message}
 
   def render(assigns) do
     IO.puts("rendering")
@@ -86,6 +86,9 @@ defmodule CCWeb.ChatRoomLive do
           <% end %>
         </ul>
       </div>
+      <div class="flex flex-col flex-grow overflow-auto">
+        <.message :for={message <- @messages} message={message} />
+      </div>
     </div>
     """
   end
@@ -109,6 +112,23 @@ defmodule CCWeb.ChatRoomLive do
     """
   end
 
+ attr :message, Message, required: true
+ defp message(assigns) do
+   ~H"""
+   <div class="relative flex px-4 py-3">
+     <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
+     <div class="ml-2">
+       <div class="-mt-1">
+         <.link class="text-sm font-semibold hover:underline">
+           <span>User</span>
+         </.link>
+         <p class="text-sm"><%= @message.body %></p>
+       </div>
+     </div>
+   </div>
+   """
+  end
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       IO.puts("mounting (connected)")
@@ -123,8 +143,12 @@ defmodule CCWeb.ChatRoomLive do
       {:ok, id} -> Chat.get_room!(id)
       :error -> Chat.get_first_room!(socket.assigns.rooms)
     end
+
+    messages = Chat.list_messages_in_room(room)
+
     {:noreply, socket
       |> assign(room: room)
+      |> assign(messages: messages)
       |> assign(hide_topic?: false)
       |> assign(page_title: "Cocktails.Coffee. #" <> room.name)
     }
