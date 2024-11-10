@@ -1,6 +1,5 @@
 defmodule CCWeb.ChatRoomLive.Edit do
   use CCWeb, :live_view
-
   alias CC.Chat
 
   def render(assigns) do
@@ -37,8 +36,7 @@ defmodule CCWeb.ChatRoomLive.Edit do
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do
-    changeset =
-      socket.assigns.room
+    changeset = socket.assigns.room
       |> Chat.get_room_changeset(room_params)
       |> Map.put(:action, :validate)
     {:noreply, assign_form(socket, changeset)}
@@ -46,14 +44,13 @@ defmodule CCWeb.ChatRoomLive.Edit do
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
     case Chat.update_room(socket.assigns.room, room_params) do
-      {:ok, room} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Room updated successfully")
-         |> push_navigate(to: ~p"/rooms/#{room}")}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+      {:ok, room} -> {:noreply, socket
+        |> put_flash(:info, "Room updated successfully")
+        |> push_navigate(to: ~p"/rooms/#{room}")
+      }
+      {:error, %Ecto.Changeset{} = changeset} -> {:noreply,
+        assign_form(socket, changeset)
+      }
     end
   end
 
