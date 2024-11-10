@@ -31,7 +31,7 @@ defmodule CCWeb.ChatRoomLive do
             #<%= @room.name %>
             <.link
               class="font-normal text-xs text-blue-600 hover:text-blue-700"
-              navigate={~p"/rooms/#{@room}/edit"}
+              navigate={~p"/realms/#{@room}/edit"}
             >
               <.icon name="hero-pencil" class="h-4 w-4 ml-1 -mt-2" />
             </.link>
@@ -54,7 +54,7 @@ defmodule CCWeb.ChatRoomLive do
   defp room_link(assigns) do
     ~H"""
     <.link
-      patch={~p"/rooms/#{@room}"}
+      patch={~p"/realms/#{@room}"}
       class={[
         "flex items-center h-8 text-sm pl-8 pr-3",
         (if @active, do: "bg-slate-300", else: "hover:bg-slate-300")
