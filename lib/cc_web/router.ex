@@ -1,6 +1,5 @@
 defmodule CCWeb.Router do
   use CCWeb, :router
-
   import CCWeb.UserAuth
 
   pipeline :browser do
@@ -22,9 +21,6 @@ defmodule CCWeb.Router do
 
     get "/", PageController, :home
     get "/home", PageController, :home
-    live "/realms", ChatRoomLive
-    live "/realms/:id", ChatRoomLive
-    live "/realms/:id/edit", ChatRoomLive.Edit
   end
 
   # Other scopes may use custom stacks.
@@ -49,13 +45,14 @@ defmodule CCWeb.Router do
     end
   end
 
-  ## Authentication routes
+  ## Authenticated routes
 
   scope "/", CCWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{CCWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+
       live "/users/register", UserRegistrationLive, :new
       live "/users/login", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
@@ -70,6 +67,10 @@ defmodule CCWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{CCWeb.UserAuth, :ensure_authenticated}] do
+
+      live "/realms", ChatRoomLive
+      live "/realms/:id", ChatRoomLive
+      live "/realms/:id/edit", ChatRoomLive.Edit
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end
@@ -82,6 +83,7 @@ defmodule CCWeb.Router do
 
     live_session :current_user,
       on_mount: [{CCWeb.UserAuth, :mount_current_user}] do
+
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
