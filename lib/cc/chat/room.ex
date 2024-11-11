@@ -2,6 +2,8 @@ defmodule CC.Chat.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias CC.Chat.Message
+
   schema "rooms" do
     field :name, :string
     field :topic, :string

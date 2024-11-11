@@ -20,3 +20,7 @@ interactive: # start interactive shell
 
 test: # run tests
   mix test
+
+seed: # insert test data into database
+  mix run priv/repo/seeds.exs
+
