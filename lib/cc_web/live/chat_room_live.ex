@@ -86,8 +86,8 @@ defmodule CCWeb.ChatRoomLive do
           <% end %>
         </ul>
       </div>
-      <div class="flex flex-col flex-grow overflow-auto">
-        <.message :for={message <- @messages} message={message} />
+      <div id="room-messages" phx-update="stream" class="flex flex-col flex-grow overflow-auto">
+        <.message :for={{dom_id, message} <- @streams.messages} dom_id={dom_id} message={message} />
       </div>
       <div class="h-14">
         <.form
@@ -137,7 +137,7 @@ defmodule CCWeb.ChatRoomLive do
   attr :message, Message, required: true
   defp message(assigns) do
     ~H"""
-    <div class="relative flex px-4 py-3">
+    <div id={@dom_id} class="relative flex px-4 py-3">
       <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
       <div class="ml-2">
         <div class="-mt-1">
@@ -170,27 +170,31 @@ defmodule CCWeb.ChatRoomLive do
       :error -> Chat.get_first_room!(socket.assigns.rooms)
     end
 
-    messages = Chat.list_messages_in_room(room)
-
-    {:noreply, assign(socket,
-      room: room,
-      messages: messages,
-      hide_topic?: false,
-      page_title: "Cocktails.Coffee. #" <> room.name,
-      new_message_form: to_form(Chat.get_message_changeset(%Message{}))
-    )}
+    {:noreply,
+      socket
+      |> stream(:messages, Chat.list_messages_in_room(room), reset: true)
+      |> assign(
+        room: room,
+        hide_topic?: false,
+        page_title: "Cocktails.Coffee. #" <> room.name,
+        new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+      )
+    }
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply, assign(socket,
-      hide_topic?: !socket.assigns.hide_topic?
-    )}
+    {:noreply,
+      assign(socket, hide_topic?: !socket.assigns.hide_topic?)
+    }
   end
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
-    {:noreply, assign(socket,
-      new_message_form: to_form(Chat.get_message_changeset(%Message{}, message_params))
-    )}
+    {:noreply,
+      assign(socket,
+        new_message_form:
+          to_form(Chat.get_message_changeset(%Message{}, message_params))
+      )
+    }
   end
 
   def handle_event("submit-message", %{"message" => message_params}, socket) do
@@ -198,7 +202,7 @@ defmodule CCWeb.ChatRoomLive do
     {:noreply,
       case Chat.create_message(room, message_params, current_user) do
         {:ok, message} -> socket
-          |> update(:messages, &(&1 ++ [message]))
+          |> stream_insert(:messages, message)
           |> assign(new_message_form: to_form(Chat.get_message_changeset(%Message{})))
         {:error, changeset} -> socket
           |> assign(new_message_form: to_form(changeset))
