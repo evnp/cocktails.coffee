@@ -32,15 +32,25 @@ defmodule CC.Chat do
     |> Repo.update()
   end
 
-  def get_room_changeset(room, attrs \\ %{}) do
-    Room.changeset(room, attrs)
-  end
-
   def list_messages_in_room(%Room{id: room_id}) do
     Message
     |> where([m], m.room_id == ^room_id)
     |> order_by([m], asc: :inserted_at, asc: :id)
     |> preload(:user)
     |> Repo.all()
+  end
+
+  def create_message(room, attrs, user) do
+    %Message{room: room, user: user}
+    |> Message.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_room_changeset(room, attrs \\ %{}) do
+    Room.changeset(room, attrs)
+  end
+
+  def get_message_changeset(message, attrs \\ %{}) do
+    Message.changeset(message, attrs)
   end
 end

@@ -89,6 +89,28 @@ defmodule CCWeb.ChatRoomLive do
       <div class="flex flex-col flex-grow overflow-auto">
         <.message :for={message <- @messages} message={message} />
       </div>
+      <div class="h-14">
+        <.form
+          id="new-message-form"
+          for={@new_message_form}
+          phx-change="validate-message"
+          phx-submit="submit-message"
+          class="flex items-center"
+        >
+          <textarea
+            class="flex-grow text-sm p-4 resize-none outline-none"
+            cols=""
+            id="chat-message-textarea"
+            name={@new_message_form[:body].name}
+            placeholder={"Message ##{@room.name}"}
+            phx-debounce
+            rows="1"
+          ><%= Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value) %></textarea>
+          <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
+            <.icon name="hero-paper-airplane" class="h-4 w-4" />
+          </button>
+        </.form>
+      </div>
     </div>
     """
   end
@@ -150,17 +172,37 @@ defmodule CCWeb.ChatRoomLive do
 
     messages = Chat.list_messages_in_room(room)
 
-    {:noreply, socket
-      |> assign(room: room)
-      |> assign(messages: messages)
-      |> assign(hide_topic?: false)
-      |> assign(page_title: "Cocktails.Coffee. #" <> room.name)
-    }
+    {:noreply, assign(socket,
+      room: room,
+      messages: messages,
+      hide_topic?: false,
+      page_title: "Cocktails.Coffee. #" <> room.name,
+      new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+    )}
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply, socket
-      |> assign(hide_topic?: !socket.assigns.hide_topic?)
+    {:noreply, assign(socket,
+      hide_topic?: !socket.assigns.hide_topic?
+    )}
+  end
+
+  def handle_event("validate-message", %{"message" => message_params}, socket) do
+    {:noreply, assign(socket,
+      new_message_form: to_form(Chat.get_message_changeset(%Message{}, message_params))
+    )}
+  end
+
+  def handle_event("submit-message", %{"message" => message_params}, socket) do
+    %{current_user: current_user, room: room} = socket.assigns
+    {:noreply,
+      case Chat.create_message(room, message_params, current_user) do
+        {:ok, message} -> socket
+          |> update(:messages, &(&1 ++ [message]))
+          |> assign(new_message_form: to_form(Chat.get_message_changeset(%Message{})))
+        {:error, changeset} -> socket
+          |> assign(new_message_form: to_form(changeset))
+      end
     }
   end
 end
