@@ -47,7 +47,7 @@ defmodule CCWeb.ChatRoomLive do
         <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
           <%= if @current_user do %>
             <li class="text-[0.8125rem] leading-6 text-zinc-900">
-              <%= @current_user.email %>
+              <%= username(@current_user) %>
             </li>
             <li>
               <.link
@@ -112,21 +112,25 @@ defmodule CCWeb.ChatRoomLive do
     """
   end
 
- attr :message, Message, required: true
- defp message(assigns) do
-   ~H"""
-   <div class="relative flex px-4 py-3">
-     <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
-     <div class="ml-2">
-       <div class="-mt-1">
-         <.link class="text-sm font-semibold hover:underline">
-           <span>User</span>
-         </.link>
-         <p class="text-sm"><%= @message.body %></p>
-       </div>
-     </div>
-   </div>
-   """
+  attr :message, Message, required: true
+  defp message(assigns) do
+    ~H"""
+    <div class="relative flex px-4 py-3">
+      <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
+      <div class="ml-2">
+        <div class="-mt-1">
+          <.link class="text-sm font-semibold hover:underline">
+            <span><%= username(@message.user) %></span>
+          </.link>
+          <p class="text-sm"><%= @message.body %></p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp username(user) do
+    user.email |> String.split("@") |> List.first() |> String.capitalize()
   end
 
   def mount(_params, _session, socket) do
