@@ -1,9 +1,10 @@
-start: # start application
+install: # install dependencies
+  mix deps.get
+
+start: kill install # (re)start application from scratch
   bash -c 'trap "loading fin" EXIT; loading; tmex phoenix -qd "mix phx.server"; sleep 5'
   run open
-
-restart: kill # restart application
-  run start
+  run logs
 
 kill: # kill application
   pkill -f phx.server || true # ignore errors
@@ -15,7 +16,7 @@ open: # open client
 logs: # attach to server
   tmex phoenix --reattach
 
-interactive: # start interactive shell
+repl: # start interactive shell
   iex -S mix
 
 test: # run tests
