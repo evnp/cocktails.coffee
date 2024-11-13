@@ -90,6 +90,14 @@ defmodule CCWeb do
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 
+      # Configure Temple (templating DSL)
+      import Temple
+      import Phoenix.LiveView.TagEngine, only: [component: 3, inner_block: 2]
+      # Second line is necessary to avoid Phoenix errors, eg.
+      # "The function "inner_block" cannot handle clauses with the -> operator..."
+      # See https://github.com/mhanberg/temple/issues/201
+      # and resulting https://github.com/georgevanderson/temple_liveview/pull/1
+
       # Routes generation with the ~p sigil
       unquote(verified_routes())
     end

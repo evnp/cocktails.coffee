@@ -5,159 +5,190 @@ defmodule CCWeb.ChatRoomLive do
   alias CC.Chat.{Room, Message}
 
   def render(assigns) do
-    IO.puts("rendering")
-    ~H"""
-    <div class="flex flex-col flex-shrink-0 w-64 bg-slate-100">
-      <div class="flex justify-between items-center flex-shrink-0 h-16 border-b border-slate-300 px-4">
-        <div class="flex flex-col gap-1.5">
-          <h1 class="text-lg font-bold text-gray-800">
-            Middle Earth
-          </h1>
-        </div>
-      </div>
-      <div class="mt-4 overflow-auto">
-        <div class="flex items-center h-8 px-3 group">
-          <span class="ml-2 leading-none font-medium text-sm">Realms</span>
-        </div>
-        <div id="rooms-list">
-          <.room_link :for={room <- @rooms} room={room} active={room.id == @room.id} />
-        </div>
-      </div>
-    </div>
-    <div class="flex flex-col flex-grow shadow-lg">
-      <div class="flex justify-between items-center flex-shrink-0 h-16 bg-white border-b border-slate-300 px-4">
-        <div class="flex flex-col gap-1.5">
-          <h1 class="text-sm font-bold leading-none">
-            #<%= @room.name %>
-            <.link
-              class="font-normal text-xs text-blue-600 hover:text-blue-700"
-              navigate={~p"/realms/#{@room}/edit"}
-            >
-              <.icon name="hero-pencil" class="h-4 w-4 ml-1 -mt-2" />
-            </.link>
-          </h1>
-          <div class="text-xs leading-none h-3.5 cursor-pointer" phx-click="toggle-topic">
-            <%= if @hide_topic? do %>
-              <span class="text-slate-600">[Topic hidden]</span>
-            <% else %>
-              <%= @room.topic %>
-            <% end %>
-          </div>
-        </div>
-        <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-          <%= if @current_user do %>
-            <li class="text-[0.8125rem] leading-6 text-zinc-900">
-              <%= username(@current_user) %>
-            </li>
-            <li>
-              <.link
-                href={~p"/users/settings"}
-                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-              >
-                Settings
-              </.link>
-            </li>
-            <li>
-              <.link
-                href={~p"/users/logout"}
-                method="delete"
-                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-              >
-                Log out
-              </.link>
-            </li>
-          <% else %>
-            <li>
-              <.link
-                href={~p"/users/register"}
-                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-              >
-                Register
-              </.link>
-            </li>
-            <li>
-              <.link
-                href={~p"/users/login"}
-                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-              >
-                Log in
-              </.link>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-      <div id="room-messages" phx-update="stream" class="flex flex-col flex-grow overflow-auto">
-        <.message
-          :for={{dom_id, message} <- @streams.messages}
-          dom_id={dom_id}
-          message={message}
-          timezone={@timezone}
-        />
-      </div>
-      <div class="h-14">
-        <.form
-          id="new-message-form"
-          for={@new_message_form}
-          phx-change="validate-message"
-          phx-submit="submit-message"
-          class="flex items-center"
-        >
-          <textarea
-            class="flex-grow text-sm p-4 resize-none outline-none"
-            cols=""
-            id="chat-message-textarea"
-            name={@new_message_form[:body].name}
-            placeholder={"Message ##{@room.name}"}
-            phx-debounce
-            rows="1"
-          ><%= Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value) %></textarea>
-          <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
-            <.icon name="hero-paper-airplane" class="h-4 w-4" />
-          </button>
-        </.form>
-      </div>
-    </div>
-    """
+    temple do
+      div class: "flex flex-col flex-shrink-0 w-64 bg-slate-100" do
+        div class: [
+          "flex justify-between items-center flex-shrink-0",
+          "h-16 border-b border-slate-300 px-4",
+        ] do
+          div class: "flex flex-col gap-1.5" do
+            h1 class: "text-lg font-bold text-gray-800" do
+              "Middle Earth"
+            end
+          end
+        end
+        div class: "mt-4 overflow-auto" do
+          div class: "flex items-center h-8 px-3 group" do
+            span class: "ml-2 leading-none font-medium text-sm", do: "Realms"
+          end
+          div id: "rooms-list" do
+            for room <- @rooms do
+              c &room_link/1, room: room, active: room.id == @room.id
+            end
+          end
+        end
+      end
+      div class: "flex flex-col flex-grow shadow-lg" do
+        div class: [
+          "flex justify-between items-center flex-shrink-0 h-16",
+          "bg-white border-b border-slate-300 px-4",
+        ] do
+          div class: "flex flex-col gap-1.5" do
+            h1 class: "text-sm font-bold leading-none" do
+              "#" <> @room.name
+              c &link/1,
+                class: "font-normal text-xs text-blue-600 hover:text-blue-700",
+                navigate: ~p"/realms/#{@room}/edit"
+              do
+                c &icon/1, name: "hero-pencil", class: "h-4 w-4 ml-1 -mt-2"
+              end
+            end
+            div class: "text-xs leading-none h-3.5 cursor-pointer",
+              "phx-click": "toggle-topic"
+            do
+              if @hide_topic? do
+                span class: "text-slate-600", do: "[Topic hidden]"
+              else
+                @room.topic
+              end
+            end
+          end
+          ul class: [
+            "relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end"
+          ] do
+            if @current_user do
+              li class: "text-[0.8125rem] leading-6 text-zinc-900" do
+                username(@current_user)
+              end
+              li do
+                c &link/1,
+                  href: ~p"/users/settings",
+                  class: [
+                    "text-[0.8125rem] leading-6 text-zinc-900",
+                    "font-semibold hover:text-zinc-700",
+                  ]
+                do
+                  "Settings"
+                end
+              end
+              li do
+                c &link/1,
+                  href: ~p"/users/logout",
+                  method: "delete",
+                  class: [
+                    "text-[0.8125rem] leading-6 text-zinc-900",
+                    "font-semibold hover:text-zinc-700",
+                  ]
+                do
+                  "Log out"
+                end
+              end
+            else
+              li do
+                c &link/1,
+                  href: ~p"/users/register",
+                  class: [
+                    "text-[0.8125rem] leading-6 text-zinc-900",
+                    "font-semibold hover:text-zinc-700",
+                  ]
+                do
+                  "Register"
+                end
+              end
+              li do
+                c &link/1,
+                  href: ~p"/users/login",
+                  class: [
+                    "text-[0.8125rem] leading-6 text-zinc-900",
+                    "font-semibold hover:text-zinc-700",
+                  ]
+                do
+                  "Log in"
+                end
+              end
+            end
+          end
+        end
+        div id: "room-messages",
+          class: "flex flex-col flex-grow overflow-auto",
+          "phx-update": "stream"
+        do
+          for {dom_id, message} <- @streams.messages do
+            c &message/1, dom_id: dom_id, message: message, timezone: @timezone
+          end
+        end
+        div class: "h-14" do
+          c &form/1,
+            id: "new-message-form",
+            class: "flex items-center",
+            for: @new_message_form,
+            "phx-change": "validate-message",
+            "phx-submit": "submit-message"
+          do
+            textarea id: "chat-message-textarea",
+              class: [
+                "flex-grow text-sm p-4",
+                "resize-none border-none outline-none ring-0",
+                "focus:border-none focus:outline-none focus:ring-0",
+              ],
+              cols: "",
+              name: @new_message_form[:body].name,
+              placeholder: "Message ##{@room.name}",
+              "phx-debounce": true,
+              rows: "1"
+            do
+              Phoenix.HTML.Form.normalize_value(
+                "textarea", @new_message_form[:body].value
+              )
+            end
+            button class: [
+              "flex-shrink flex items-center justify-center",
+              "h-6 w-6 rounded hover:bg-slate-200",
+            ] do
+              c &icon/1, name: "hero-paper-airplane", class: "h-4 w-4"
+            end
+          end
+        end
+      end
+    end
   end
 
   attr :active, :boolean, required: true
   attr :room, Room, required: true
   defp room_link(assigns) do
-    ~H"""
-    <.link
-      patch={~p"/realms/#{@room}"}
-      class={[
+    temple do
+      c &link/1, patch: ~p"/realms/#{@room}", class: [
         "flex items-center h-8 text-sm pl-8 pr-3",
         (if @active, do: "bg-slate-300", else: "hover:bg-slate-300")
-      ]}
-    >
-      <.icon name="hero-hashtag" class="h-4 w-4" />
-      <span class={["ml-2 leading-none", @active && "font-bold"]}>
-        <%= @room.name %>
-      </span>
-    </.link>
-    """
+      ] do
+        c &icon/1, name: "hero-hashtag", class: "h-4 w-4"
+        span class: ["ml-2 leading-none", @active && "font-bold"], do: @room.name
+      end
+    end
   end
 
   attr :message, Message, required: true
+  attr :dom_id, :string, required: true
   attr :timezone, :string, required: true
   defp message(assigns) do
-    ~H"""
-    <div id={@dom_id} class="relative flex px-4 py-3">
-      <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
-      <div class="ml-2">
-        <div class="-mt-1">
-          <.link class="text-sm font-semibold hover:underline">
-            <span><%= username(@message.user) %></span>
-          </.link>
-          <span :if={@timezone} class="ml-1 text-xs text-gray-500">
-            <%= message_timestamp(@message, @timezone) %>
-          </span>
-          <p class="text-sm"><%= @message.body %></p>
-        </div>
-      </div>
-    </div>
-    """
+    temple do
+      div id: @dom_id, class: "relative flex px-4 py-3" do
+        div class: "h-10 w-10 rounded flex-shrink-0 bg-slate-300"
+        div class: "ml-2" do
+          div class: "-mt-1" do
+            c &link/1, class: "text-sm font-semibold hover:underline" do
+              span do: username(@message.user)
+            end
+            if @timezone do
+              span class: "ml-1 text-xs text-gray-500" do
+                message_timestamp(@message, @timezone)
+              end
+            end
+            p class: "text-sm", do: @message.body
+          end
+        end
+      end
+    end
   end
 
   defp username(user) do
