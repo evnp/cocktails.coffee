@@ -1,6 +1,7 @@
 defmodule CcWeb.ChatRoomLive do
   use CcWeb, :live_view
 
+  alias Cc.Accounts.User
   alias Cc.Chat
   alias Cc.Chat.{Room, Message}
 
@@ -114,7 +115,11 @@ defmodule CcWeb.ChatRoomLive do
           "phx-update": "stream"
         do
           for {dom_id, message} <- @streams.messages do
-            c &message/1, dom_id: dom_id, message: message, timezone: @timezone
+            c &message/1,
+              message: message,
+              current_user: @current_user,
+              dom_id: dom_id,
+              timezone: @timezone
           end
         end
         div class: "h-14 shadow-2xl border-t" do
@@ -168,11 +173,23 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   attr :message, Message, required: true
+  attr :current_user, User, required: true
   attr :dom_id, :string, required: true
   attr :timezone, :string, required: true
   defp message(assigns) do
     temple do
       div id: @dom_id, class: "relative flex px-4 py-3" do
+        if @current_user.id == @message.user_id do
+          button "phx-click": "delete-message",
+            "phx-value-id": @message.id,
+            "data-confirm": "Are you sure?",
+            class: [
+              "absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer"
+            ]
+          do
+            c &icon/1, name: "hero-trash", class: "h-4 w-4"
+          end
+        end
         div class: "h-10 w-10 rounded flex-shrink-0 bg-slate-300"
         div class: "ml-2" do
           div class: "-mt-1" do
@@ -257,5 +274,10 @@ defmodule CcWeb.ChatRoomLive do
           |> assign(new_message_form: to_form(changeset))
       end
     }
+  end
+
+  def handle_event("delete-message", %{"id" => id}, socket) do
+    {:ok, message} = Chat.delete_message(id, socket.assigns.current_user)
+    {:noreply, stream_delete(socket, :messages, message)}
   end
 end

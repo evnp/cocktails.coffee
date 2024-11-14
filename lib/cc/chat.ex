@@ -1,4 +1,5 @@
 defmodule Cc.Chat do
+  alias Cc.Accounts.User
   alias Cc.Chat.{Room, Message}
   alias Cc.Repo
   import Ecto.Query
@@ -44,6 +45,12 @@ defmodule Cc.Chat do
     %Message{room: room, user: user}
     |> Message.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def delete_message(id, %User{id: user_id}) do
+    # Raise MatchError if message with ID does not have correct user ID:
+    message = %Message{user_id: ^user_id} = Repo.get(Message, id)
+    Repo.delete(message)
   end
 
   def get_room_changeset(room, attrs \\ %{}) do
