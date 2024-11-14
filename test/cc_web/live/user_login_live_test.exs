@@ -1,8 +1,8 @@
-defmodule CCWeb.UserLoginLiveTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserLoginLiveTest do
+  use CcWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
   describe "Log in page" do
     test "renders log in page", %{conn: conn} do

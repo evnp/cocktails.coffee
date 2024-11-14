@@ -1,11 +1,11 @@
-defmodule CCWeb.UserConfirmationInstructionsLiveTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserConfirmationInstructionsLiveTest do
+  use CcWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
-  alias CC.Accounts
-  alias CC.Repo
+  alias Cc.Accounts
+  alias Cc.Repo
 
   setup do
     %{user: user_fixture()}

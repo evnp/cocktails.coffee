@@ -1,3 +1,3 @@
-defmodule CC.Mailer do
+defmodule Cc.Mailer do
   use Swoosh.Mailer, otp_app: :cc
 end

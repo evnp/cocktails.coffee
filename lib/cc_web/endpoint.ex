@@ -1,4 +1,4 @@
-defmodule CCWeb.Endpoint do
+defmodule CcWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :cc
 
   # The session will be stored in the cookie and signed,
@@ -23,7 +23,7 @@ defmodule CCWeb.Endpoint do
     at: "/",
     from: :cc,
     gzip: false,
-    only: CCWeb.static_paths()
+    only: CcWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -49,5 +49,5 @@ defmodule CCWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug CCWeb.Router
+  plug CcWeb.Router
 end

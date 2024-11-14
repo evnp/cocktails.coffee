@@ -8,18 +8,18 @@
 import Config
 
 config :cc,
-  ecto_repos: [CC.Repo],
+  ecto_repos: [Cc.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
-config :cc, CCWeb.Endpoint,
+config :cc, CcWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: CCWeb.ErrorHTML, json: CCWeb.ErrorJSON],
+    formats: [html: CcWeb.ErrorHTML, json: CcWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: CC.PubSub,
+  pubsub_server: Cc.PubSub,
   live_view: [signing_salt: "3RjZ46CH"]
 
 # Configures the mailer
@@ -29,7 +29,7 @@ config :cc, CCWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :cc, CC.Mailer, adapter: Swoosh.Adapters.Local
+config :cc, Cc.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,

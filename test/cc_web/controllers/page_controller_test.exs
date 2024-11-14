@@ -1,5 +1,5 @@
-defmodule CCWeb.PageControllerTest do
-  use CCWeb.ConnCase
+defmodule CcWeb.PageControllerTest do
+  use CcWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

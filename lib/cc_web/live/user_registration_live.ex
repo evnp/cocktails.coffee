@@ -1,8 +1,8 @@
-defmodule CCWeb.UserRegistrationLive do
-  use CCWeb, :live_view
+defmodule CcWeb.UserRegistrationLive do
+  use CcWeb, :live_view
 
-  alias CC.Accounts
-  alias CC.Accounts.User
+  alias Cc.Accounts
+  alias Cc.Accounts.User
 
   def render(assigns) do
     ~H"""

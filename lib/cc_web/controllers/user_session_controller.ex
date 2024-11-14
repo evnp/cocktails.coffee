@@ -1,8 +1,8 @@
-defmodule CCWeb.UserSessionController do
-  use CCWeb, :controller
+defmodule CcWeb.UserSessionController do
+  use CcWeb, :controller
 
-  alias CC.Accounts
-  alias CCWeb.UserAuth
+  alias Cc.Accounts
+  alias CcWeb.UserAuth
 
   def create(conn, %{"_action" => "registered"} = params) do
     create(conn, params, "Account created successfully!")

@@ -1,4 +1,4 @@
-defmodule CC.Repo.Migrations.CreateUniqueIndexOnRoomName do
+defmodule Cc.Repo.Migrations.CreateUniqueIndexOnRoomName do
   use Ecto.Migration
 
   def change do

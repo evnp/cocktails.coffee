@@ -1,7 +1,7 @@
-defmodule CCWeb.UserSessionControllerTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserSessionControllerTest do
+  use CcWeb.ConnCase, async: true
 
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
   setup do
     %{user: user_fixture()}

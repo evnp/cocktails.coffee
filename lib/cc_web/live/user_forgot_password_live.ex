@@ -1,7 +1,7 @@
-defmodule CCWeb.UserForgotPasswordLive do
-  use CCWeb, :live_view
+defmodule CcWeb.UserForgotPasswordLive do
+  use CcWeb, :live_view
 
-  alias CC.Accounts
+  alias Cc.Accounts
 
   def render(assigns) do
     ~H"""

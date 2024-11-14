@@ -1,4 +1,4 @@
-defmodule CCWeb.CoreComponents do
+defmodule CcWeb.CoreComponents do
   @moduledoc """
   Provides core UI components.
 
@@ -17,7 +17,7 @@ defmodule CCWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import CCWeb.Gettext
+  import CcWeb.Gettext
 
   @doc """
   Renders a modal.
@@ -662,9 +662,9 @@ defmodule CCWeb.CoreComponents do
     # with our gettext backend as first argument. Translations are
     # available in the errors.po file (as we use the "errors" domain).
     if count = opts[:count] do
-      Gettext.dngettext(CCWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(CcWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(CCWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(CcWeb.Gettext, "errors", msg, opts)
     end
   end
 

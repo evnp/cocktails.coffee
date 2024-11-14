@@ -1,7 +1,7 @@
-defmodule CC.Accounts.UserToken do
+defmodule Cc.Accounts.UserToken do
   use Ecto.Schema
   import Ecto.Query
-  alias CC.Accounts.UserToken
+  alias Cc.Accounts.UserToken
 
   @hash_algorithm :sha256
   @rand_size 32
@@ -17,7 +17,7 @@ defmodule CC.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, CC.Accounts.User
+    belongs_to :user, Cc.Accounts.User
 
     timestamps(type: :utc_datetime, updated_at: false)
   end

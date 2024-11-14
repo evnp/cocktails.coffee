@@ -1,8 +1,8 @@
-defmodule CCWeb.UserRegistrationLiveTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserRegistrationLiveTest do
+  use CcWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do

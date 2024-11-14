@@ -1,11 +1,11 @@
-defmodule CCWeb.UserForgotPasswordLiveTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserForgotPasswordLiveTest do
+  use CcWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
-  alias CC.Accounts
-  alias CC.Repo
+  alias Cc.Accounts
+  alias Cc.Repo
 
   describe "Forgot password page" do
     test "renders email page", %{conn: conn} do

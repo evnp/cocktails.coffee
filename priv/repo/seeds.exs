@@ -5,15 +5,15 @@
 # Inside the script, you can read and write to any of your
 # repositories directly:
 #
-#     CC.Repo.insert!(%CC.SomeSchema{})
+#     Cc.Repo.insert!(%Cc.SomeSchema{})
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias CC.Accounts
-alias CC.Chat.Room
-alias CC.Chat.Message
-alias CC.Repo
+alias Cc.Accounts
+alias Cc.Chat.Room
+alias Cc.Chat.Message
+alias Cc.Repo
 
 names = [
   "Aragorn",

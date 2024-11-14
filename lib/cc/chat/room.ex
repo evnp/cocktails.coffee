@@ -1,8 +1,8 @@
-defmodule CC.Chat.Room do
+defmodule Cc.Chat.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias CC.Chat.Message
+  alias Cc.Chat.Message
 
   schema "rooms" do
     field :name, :string
@@ -36,7 +36,7 @@ defmodule CC.Chat.Room do
     )
     |> validate_length(:topic, max: 200)
     |> unique_constraint(:name)
-    |> unsafe_validate_unique(:name, CC.Repo,
+    |> unsafe_validate_unique(:name, Cc.Repo,
       message: "You shall use a realm name that doesn't yet exist."
     )
   end

@@ -1,9 +1,9 @@
-defmodule CCWeb.UserSettingsLiveTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserSettingsLiveTest do
+  use CcWeb.ConnCase, async: true
 
-  alias CC.Accounts
+  alias Cc.Accounts
   import Phoenix.LiveViewTest
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do

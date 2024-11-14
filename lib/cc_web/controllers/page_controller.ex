@@ -1,5 +1,5 @@
-defmodule CCWeb.PageController do
-  use CCWeb, :controller
+defmodule CcWeb.PageController do
+  use CcWeb, :controller
 
   def home(conn, _params) do
     # The home page is often custom made,

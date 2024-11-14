@@ -1,4 +1,4 @@
-defmodule CC.Application do
+defmodule Cc.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,21 +8,21 @@ defmodule CC.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      CCWeb.Telemetry,
-      CC.Repo,
+      CcWeb.Telemetry,
+      Cc.Repo,
       {DNSCluster, query: Application.get_env(:cc, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: CC.PubSub},
+      {Phoenix.PubSub, name: Cc.PubSub},
       # Start the Finch HTTP client for sending emails
-      {Finch, name: CC.Finch},
-      # Start a worker by calling: CC.Worker.start_link(arg)
-      # {CC.Worker, arg},
+      {Finch, name: Cc.Finch},
+      # Start a worker by calling: Cc.Worker.start_link(arg)
+      # {Cc.Worker, arg},
       # Start to serve requests, typically the last entry
-      CCWeb.Endpoint
+      CcWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: CC.Supervisor]
+    opts = [strategy: :one_for_one, name: Cc.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
@@ -30,7 +30,7 @@ defmodule CC.Application do
   # whenever the application is updated.
   @impl true
   def config_change(changed, _new, removed) do
-    CCWeb.Endpoint.config_change(changed, removed)
+    CcWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

@@ -1,4 +1,4 @@
-defmodule CCWeb.ConnCase do
+defmodule CcWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule CCWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use CCWeb.ConnCase, async: true`, although
+  by setting `use CcWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -20,19 +20,19 @@ defmodule CCWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      @endpoint CCWeb.Endpoint
+      @endpoint CcWeb.Endpoint
 
-      use CCWeb, :verified_routes
+      use CcWeb, :verified_routes
 
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import CCWeb.ConnCase
+      import CcWeb.ConnCase
     end
   end
 
   setup tags do
-    CC.DataCase.setup_sandbox(tags)
+    Cc.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 
@@ -45,7 +45,7 @@ defmodule CCWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn}) do
-    user = CC.AccountsFixtures.user_fixture()
+    user = Cc.AccountsFixtures.user_fixture()
     %{conn: log_in_user(conn, user), user: user}
   end
 
@@ -55,7 +55,7 @@ defmodule CCWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn, user) do
-    token = CC.Accounts.generate_user_session_token(user)
+    token = Cc.Accounts.generate_user_session_token(user)
 
     conn
     |> Phoenix.ConnTest.init_test_session(%{})

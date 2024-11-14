@@ -1,12 +1,12 @@
-defmodule CCWeb do
+defmodule CcWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, components, channels, and so on.
 
   This can be used in your application as:
 
-      use CCWeb, :controller
-      use CCWeb, :html
+      use CcWeb, :controller
+      use CcWeb, :html
 
   The definitions below will be executed for every controller,
   component, etc, so keep them short and clean, focused
@@ -40,10 +40,10 @@ defmodule CCWeb do
     quote do
       use Phoenix.Controller,
         formats: [:html, :json],
-        layouts: [html: CCWeb.Layouts]
+        layouts: [html: CcWeb.Layouts]
 
       import Plug.Conn
-      import CCWeb.Gettext
+      import CcWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -52,7 +52,7 @@ defmodule CCWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {CCWeb.Layouts, :app}
+        layout: {CcWeb.Layouts, :app}
 
       unquote(html_helpers())
     end
@@ -84,8 +84,8 @@ defmodule CCWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
-      import CCWeb.CoreComponents
-      import CCWeb.Gettext
+      import CcWeb.CoreComponents
+      import CcWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
@@ -106,9 +106,9 @@ defmodule CCWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: CCWeb.Endpoint,
-        router: CCWeb.Router,
-        statics: CCWeb.static_paths()
+        endpoint: CcWeb.Endpoint,
+        router: CcWeb.Router,
+        statics: CcWeb.static_paths()
     end
   end
 

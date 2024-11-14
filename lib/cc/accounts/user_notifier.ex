@@ -1,14 +1,14 @@
-defmodule CC.Accounts.UserNotifier do
+defmodule Cc.Accounts.UserNotifier do
   import Swoosh.Email
 
-  alias CC.Mailer
+  alias Cc.Mailer
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
     email =
       new()
       |> to(recipient)
-      |> from({"CC", "contact@example.com"})
+      |> from({"Cc", "contact@example.com"})
       |> subject(subject)
       |> text_body(body)
 

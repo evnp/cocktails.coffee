@@ -1,4 +1,4 @@
-# CC
+# Cc
 
 To start your Phoenix server:
 

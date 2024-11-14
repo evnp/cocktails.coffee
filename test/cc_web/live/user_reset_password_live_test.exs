@@ -1,10 +1,10 @@
-defmodule CCWeb.UserResetPasswordLiveTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserResetPasswordLiveTest do
+  use CcWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import CC.AccountsFixtures
+  import Cc.AccountsFixtures
 
-  alias CC.Accounts
+  alias Cc.Accounts
 
   setup do
     user = user_fixture()

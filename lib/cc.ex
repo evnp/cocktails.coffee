@@ -1,6 +1,6 @@
-defmodule CC do
+defmodule Cc do
   @moduledoc """
-  CC keeps the contexts that define your domain
+  Cc keeps the contexts that define your domain
   and business logic.
 
   Contexts are also responsible for managing your data, regardless

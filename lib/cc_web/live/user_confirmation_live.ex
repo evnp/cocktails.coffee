@@ -1,7 +1,7 @@
-defmodule CCWeb.UserConfirmationLive do
-  use CCWeb, :live_view
+defmodule CcWeb.UserConfirmationLive do
+  use CcWeb, :live_view
 
-  alias CC.Accounts
+  alias Cc.Accounts
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""

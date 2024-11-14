@@ -1,7 +1,7 @@
-defmodule CCWeb.UserSettingsLive do
-  use CCWeb, :live_view
+defmodule CcWeb.UserSettingsLive do
+  use CcWeb, :live_view
 
-  alias CC.Accounts
+  alias Cc.Accounts
 
   def render(assigns) do
     ~H"""

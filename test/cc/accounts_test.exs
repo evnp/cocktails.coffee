@@ -1,10 +1,10 @@
-defmodule CC.AccountsTest do
-  use CC.DataCase
+defmodule Cc.AccountsTest do
+  use Cc.DataCase
 
-  alias CC.Accounts
+  alias Cc.Accounts
 
-  import CC.AccountsFixtures
-  alias CC.Accounts.{User, UserToken}
+  import Cc.AccountsFixtures
+  alias Cc.Accounts.{User, UserToken}
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do

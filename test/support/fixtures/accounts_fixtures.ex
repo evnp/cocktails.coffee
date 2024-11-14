@@ -1,7 +1,7 @@
-defmodule CC.AccountsFixtures do
+defmodule Cc.AccountsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `CC.Accounts` context.
+  entities via the `Cc.Accounts` context.
   """
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
@@ -18,7 +18,7 @@ defmodule CC.AccountsFixtures do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> CC.Accounts.register_user()
+      |> Cc.Accounts.register_user()
 
     user
   end

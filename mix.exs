@@ -1,4 +1,4 @@
-defmodule CC.MixProject do
+defmodule Cc.MixProject do
   use Mix.Project
 
   def project do
@@ -18,7 +18,7 @@ defmodule CC.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {CC.Application, []},
+      mod: {Cc.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

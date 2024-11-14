@@ -1,5 +1,5 @@
-defmodule CCWeb.UserLoginLive do
-  use CCWeb, :live_view
+defmodule CcWeb.UserLoginLive do
+  use CcWeb, :live_view
 
   def render(assigns) do
     ~H"""

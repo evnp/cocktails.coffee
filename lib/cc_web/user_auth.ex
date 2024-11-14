@@ -1,10 +1,10 @@
-defmodule CCWeb.UserAuth do
-  use CCWeb, :verified_routes
+defmodule CcWeb.UserAuth do
+  use CcWeb, :verified_routes
 
   import Plug.Conn
   import Phoenix.Controller
 
-  alias CC.Accounts
+  alias Cc.Accounts
 
   # Make the remember me cookie valid for 60 days.
   # If you want bump or reduce this value, also change
@@ -77,7 +77,7 @@ defmodule CCWeb.UserAuth do
     user_token && Accounts.delete_user_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
-      CCWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+      CcWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
     end
 
     conn
@@ -132,16 +132,16 @@ defmodule CCWeb.UserAuth do
   Use the `on_mount` lifecycle macro in LiveViews to mount or authenticate
   the current_user:
 
-      defmodule CCWeb.PageLive do
-        use CCWeb, :live_view
+      defmodule CcWeb.PageLive do
+        use CcWeb, :live_view
 
-        on_mount {CCWeb.UserAuth, :mount_current_user}
+        on_mount {CcWeb.UserAuth, :mount_current_user}
         ...
       end
 
   Or use the `live_session` of your router to invoke the on_mount callback:
 
-      live_session :authenticated, on_mount: [{CCWeb.UserAuth, :ensure_authenticated}] do
+      live_session :authenticated, on_mount: [{CcWeb.UserAuth, :ensure_authenticated}] do
         live "/profile", ProfileLive, :index
       end
   """

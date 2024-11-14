@@ -1,6 +1,6 @@
-defmodule CC.Chat do
-  alias CC.Chat.{Room, Message}
-  alias CC.Repo
+defmodule Cc.Chat do
+  alias Cc.Chat.{Room, Message}
+  alias Cc.Repo
   import Ecto.Query
 
   def list_rooms do

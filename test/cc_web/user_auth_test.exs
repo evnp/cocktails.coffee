@@ -1,17 +1,17 @@
-defmodule CCWeb.UserAuthTest do
-  use CCWeb.ConnCase, async: true
+defmodule CcWeb.UserAuthTest do
+  use CcWeb.ConnCase, async: true
 
   alias Phoenix.LiveView
-  alias CC.Accounts
-  alias CCWeb.UserAuth
-  import CC.AccountsFixtures
+  alias Cc.Accounts
+  alias CcWeb.UserAuth
+  import Cc.AccountsFixtures
 
   @remember_me_cookie "_cc_web_user_remember_me"
 
   setup %{conn: conn} do
     conn =
       conn
-      |> Map.replace!(:secret_key_base, CCWeb.Endpoint.config(:secret_key_base))
+      |> Map.replace!(:secret_key_base, CcWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
     %{user: user_fixture(), conn: conn}
@@ -66,7 +66,7 @@ defmodule CCWeb.UserAuthTest do
 
     test "broadcasts to the given live_socket_id", %{conn: conn} do
       live_socket_id = "users_sessions:abcdef-token"
-      CCWeb.Endpoint.subscribe(live_socket_id)
+      CcWeb.Endpoint.subscribe(live_socket_id)
 
       conn
       |> put_session(:live_socket_id, live_socket_id)
@@ -164,7 +164,7 @@ defmodule CCWeb.UserAuthTest do
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       socket = %LiveView.Socket{
-        endpoint: CCWeb.Endpoint,
+        endpoint: CcWeb.Endpoint,
         assigns: %{__changed__: %{}, flash: %{}}
       }
 
@@ -176,7 +176,7 @@ defmodule CCWeb.UserAuthTest do
       session = conn |> get_session()
 
       socket = %LiveView.Socket{
-        endpoint: CCWeb.Endpoint,
+        endpoint: CcWeb.Endpoint,
         assigns: %{__changed__: %{}, flash: %{}}
       }
 

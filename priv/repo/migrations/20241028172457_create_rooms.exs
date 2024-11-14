@@ -1,4 +1,4 @@
-defmodule CC.Repo.Migrations.CreateRooms do
+defmodule Cc.Repo.Migrations.CreateRooms do
   use Ecto.Migration
 
   def change do

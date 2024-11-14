@@ -1,12 +1,12 @@
-defmodule CCWeb.Router do
-  use CCWeb, :router
-  import CCWeb.UserAuth
+defmodule CcWeb.Router do
+  use CcWeb, :router
+  import CcWeb.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, html: {CCWeb.Layouts, :root}
+    plug :put_root_layout, html: {CcWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
@@ -16,7 +16,7 @@ defmodule CCWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", CCWeb do
+  scope "/", CcWeb do
     pipe_through :browser
 
     get "/", PageController, :home
@@ -24,7 +24,7 @@ defmodule CCWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", CCWeb do
+  # scope "/api", CcWeb do
   #   pipe_through :api
   # end
 
@@ -40,18 +40,18 @@ defmodule CCWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: CCWeb.Telemetry
+      live_dashboard "/dashboard", metrics: CcWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 
   ## Authenticated routes
 
-  scope "/", CCWeb do
+  scope "/", CcWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
-      on_mount: [{CCWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      on_mount: [{CcWeb.UserAuth, :redirect_if_user_is_authenticated}] do
 
       live "/users/register", UserRegistrationLive, :new
       live "/users/login", UserLoginLive, :new
@@ -62,11 +62,11 @@ defmodule CCWeb.Router do
     post "/users/login", UserSessionController, :create
   end
 
-  scope "/", CCWeb do
+  scope "/", CcWeb do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
-      on_mount: [{CCWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{CcWeb.UserAuth, :ensure_authenticated}] do
 
       live "/realms", ChatRoomLive
       live "/realms/:id", ChatRoomLive
@@ -76,13 +76,13 @@ defmodule CCWeb.Router do
     end
   end
 
-  scope "/", CCWeb do
+  scope "/", CcWeb do
     pipe_through [:browser]
 
     delete "/users/logout", UserSessionController, :delete
 
     live_session :current_user,
-      on_mount: [{CCWeb.UserAuth, :mount_current_user}] do
+      on_mount: [{CcWeb.UserAuth, :mount_current_user}] do
 
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new

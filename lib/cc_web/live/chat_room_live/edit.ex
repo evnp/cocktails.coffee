@@ -1,7 +1,7 @@
-defmodule CCWeb.ChatRoomLive.Edit do
-  use CCWeb, :live_view
+defmodule CcWeb.ChatRoomLive.Edit do
+  use CcWeb, :live_view
 
-  alias CC.Chat
+  alias Cc.Chat
 
   def render(assigns) do
     temple do

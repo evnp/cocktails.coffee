@@ -1,12 +1,12 @@
-defmodule CC.Accounts do
+defmodule Cc.Accounts do
   @moduledoc """
   The Accounts context.
   """
 
   import Ecto.Query, warn: false
-  alias CC.Repo
+  alias Cc.Repo
 
-  alias CC.Accounts.{User, UserToken, UserNotifier}
+  alias Cc.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
 

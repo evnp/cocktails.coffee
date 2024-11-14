@@ -1,9 +1,9 @@
-defmodule CC.Chat.Message do
+defmodule Cc.Chat.Message do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias CC.Accounts.User
-  alias CC.Chat.Room
+  alias Cc.Accounts.User
+  alias Cc.Chat.Room
 
   schema "messages" do
     field :body, :string
