@@ -8,8 +8,8 @@ defmodule CCWeb.ChatRoomLive do
     temple do
       div class: "flex flex-col flex-shrink-0 w-64 bg-slate-100" do
         div class: [
+          "h-16 px-4",
           "flex justify-between items-center flex-shrink-0",
-          "h-16 border-b border-slate-300 px-4",
         ] do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-lg font-bold text-gray-800" do
@@ -30,8 +30,8 @@ defmodule CCWeb.ChatRoomLive do
       end
       div class: "flex flex-col flex-grow shadow-lg" do
         div class: [
-          "flex justify-between items-center flex-shrink-0 h-16",
-          "bg-white border-b border-slate-300 px-4",
+          "h-16 px-4 shadow",
+          "flex justify-between items-center flex-shrink-0",
         ] do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-sm font-bold leading-none" do
@@ -117,7 +117,7 @@ defmodule CCWeb.ChatRoomLive do
             c &message/1, dom_id: dom_id, message: message, timezone: @timezone
           end
         end
-        div class: "h-14" do
+        div class: "h-14 shadow-2xl border-t" do
           c &form/1,
             id: "new-message-form",
             class: "flex items-center",
@@ -127,7 +127,7 @@ defmodule CCWeb.ChatRoomLive do
           do
             textarea id: "chat-message-textarea",
               class: [
-                "flex-grow text-sm p-4",
+                "flex-grow text-sm p-4 bg-transparent",
                 "resize-none border-none outline-none ring-0",
                 "focus:border-none focus:outline-none focus:ring-0",
               ],
@@ -142,8 +142,8 @@ defmodule CCWeb.ChatRoomLive do
               )
             end
             button class: [
-              "flex-shrink flex items-center justify-center",
-              "h-6 w-6 rounded hover:bg-slate-200",
+              "h-8 w-8 mr-2 rounded flex-shrink flex items-center justify-center",
+              "hover:bg-slate-200 transition-colors",
             ] do
               c &icon/1, name: "hero-paper-airplane", class: "h-4 w-4"
             end
