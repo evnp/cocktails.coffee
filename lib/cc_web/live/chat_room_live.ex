@@ -19,7 +19,7 @@ defmodule CcWeb.ChatRoomLive do
           end
         end
         div class: "mt-4 overflow-auto" do
-          div class: "flex items-center h-8 px-3 group" do
+          div class: "flex items-center h-8 px-3" do
             span class: "ml-2 leading-none font-medium text-sm", do: "Realms"
           end
           div id: "rooms-list" do
@@ -178,13 +178,14 @@ defmodule CcWeb.ChatRoomLive do
   attr :timezone, :string, required: true
   defp message(assigns) do
     temple do
-      div id: @dom_id, class: "relative flex px-4 py-3" do
+      div id: @dom_id, class: "group relative flex px-4 py-3" do
         if @current_user.id == @message.user_id do
           button "phx-click": "delete-message",
             "phx-value-id": @message.id,
             "data-confirm": "Are you sure?",
             class: [
-              "absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer"
+              "absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer",
+              "opacity-0 group-hover:opacity-100 transition"
             ]
           do
             c &icon/1, name: "hero-trash", class: "h-4 w-4"
