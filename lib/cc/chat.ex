@@ -4,6 +4,8 @@ defmodule Cc.Chat do
   alias Cc.Repo
   import Ecto.Query
 
+  @pubsub Cc.PubSub
+
   def list_rooms do
     Repo.all(from r in Room, order_by: [asc: :name])
   end
@@ -42,15 +44,25 @@ defmodule Cc.Chat do
   end
 
   def create_message(room, attrs, user) do
-    %Message{room: room, user: user}
-    |> Message.changeset(attrs)
-    |> Repo.insert()
+    result = %Message{room: room, user: user}
+      |> Message.changeset(attrs)
+      |> Repo.insert()
+
+    with {:ok, message} <- result do
+      Phoenix.PubSub.broadcast!(@pubsub, room_pubsub_topic(room), {:new_message, message})
+      {:ok, message}
+    end
   end
 
   def delete_message(id, %User{id: user_id}) do
     # Raise MatchError if message with ID does not have correct user ID:
     message = %Message{user_id: ^user_id} = Repo.get(Message, id)
-    Repo.delete(message)
+    result = Repo.delete(message)
+
+    with {:ok, message} <- result do
+      Phoenix.PubSub.broadcast!(@pubsub, room_pubsub_topic(message.room_id), {:message_deleted, message})
+      {:ok, message}
+    end
   end
 
   def get_room_changeset(room, attrs \\ %{}) do
@@ -59,5 +71,20 @@ defmodule Cc.Chat do
 
   def get_message_changeset(message, attrs \\ %{}) do
     Message.changeset(message, attrs)
+  end
+
+  def room_pubsub_topic(%Room{id: room_id}) do
+    room_pubsub_topic(room_id)
+  end
+  def room_pubsub_topic(room_id) do
+    "chat_room:#{room_id}"
+  end
+
+  def room_pubsub_subscribe(room) do
+    Phoenix.PubSub.subscribe(@pubsub, room_pubsub_topic(room))
+  end
+
+  def room_pubsub_unsubscribe(room) do
+    Phoenix.PubSub.unsubscribe(@pubsub, room_pubsub_topic(room))
   end
 end

@@ -232,10 +232,16 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_params(params, _session, socket) do
+    if socket.assigns[:room] do
+      Chat.room_pubsub_unsubscribe(socket.assigns.room)
+    end
+
     room = case params |> Map.fetch("id") do
       {:ok, id} -> Chat.get_room!(id)
       :error -> Chat.get_first_room!(socket.assigns.rooms)
     end
+
+    Chat.room_pubsub_subscribe(room)
 
     {:noreply,
       socket
@@ -268,8 +274,7 @@ defmodule CcWeb.ChatRoomLive do
     %{current_user: current_user, room: room} = socket.assigns
     {:noreply,
       case Chat.create_message(room, message_params, current_user) do
-        {:ok, message} -> socket
-          |> stream_insert(:messages, message)
+        {:ok, _message} -> socket
           |> assign(new_message_form: to_form(Chat.get_message_changeset(%Message{})))
         {:error, changeset} -> socket
           |> assign(new_message_form: to_form(changeset))
@@ -278,7 +283,15 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
-    {:ok, message} = Chat.delete_message(id, socket.assigns.current_user)
+    Chat.delete_message(id, socket.assigns.current_user)
+    {:noreply, socket}
+  end
+
+  def handle_info({:new_message, message}, socket) do
+    {:noreply, stream_insert(socket, :messages, message)}
+  end
+
+  def handle_info({:message_deleted, message}, socket) do
     {:noreply, stream_delete(socket, :messages, message)}
   end
 end
