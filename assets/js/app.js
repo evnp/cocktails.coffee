@@ -22,6 +22,14 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 
+import ChatMessageTextarea from "./hooks/ChatMessageTextarea";
+import RoomMessages from "./hooks/RoomMessages";
+
+const hooks = {
+  ChatMessageTextarea,
+  RoomMessages,
+};
+
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
@@ -31,8 +39,9 @@ const liveSocket = new LiveSocket("/live", Socket, {
     _csrf_token: csrfToken,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   },
-  // Clear flash messages automatically after 5 seconds:
   hooks: {
+    ...hooks,
+    // Clear flash messages automatically after 5 seconds:
     AutoClearFlash: {
       mounted() {
         if (!["client-error", "server-error"].includes(this.el.id)) {

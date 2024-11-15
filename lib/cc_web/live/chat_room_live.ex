@@ -112,7 +112,8 @@ defmodule CcWeb.ChatRoomLive do
         end
         div id: "room-messages",
           class: "flex flex-col flex-grow overflow-auto",
-          "phx-update": "stream"
+          "phx-update": "stream",
+          "phx-hook": "RoomMessages"
         do
           for {dom_id, message} <- @streams.messages do
             c &message/1,
@@ -140,6 +141,7 @@ defmodule CcWeb.ChatRoomLive do
               name: @new_message_form[:body].name,
               placeholder: "Message ##{@room.name}",
               "phx-debounce": true,
+              "phx-hook": "ChatMessageTextarea",
               rows: "1"
             do
               Phoenix.HTML.Form.normalize_value(
@@ -252,6 +254,7 @@ defmodule CcWeb.ChatRoomLive do
         page_title: "Cocktails.Coffee. #" <> room.name,
         new_message_form: to_form(Chat.get_message_changeset(%Message{}))
       )
+      |> push_event("scroll_messages_to_bottom", %{})
     }
   end
 
@@ -288,7 +291,11 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_info({:new_message, message}, socket) do
-    {:noreply, stream_insert(socket, :messages, message)}
+    socket =
+      socket
+      |> stream_insert(:messages, message)
+      |> push_event("scroll_messages_to_bottom", %{})
+    {:noreply, socket}
   end
 
   def handle_info({:message_deleted, message}, socket) do
