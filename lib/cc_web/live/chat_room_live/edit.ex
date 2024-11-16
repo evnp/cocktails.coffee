@@ -43,10 +43,17 @@ defmodule CcWeb.ChatRoomLive.Edit do
 
   def mount(%{"id" => id}, _session, socket) do
     room = Chat.get_room!(id)
-    {:ok, socket
-      |> assign(page_title: "Edit chat room", room: room)
-      |> assign_form(Chat.get_room_changeset(room))
-    }
+    if Chat.joined_room?(room, socket.assigns.current_user) do
+      {:ok, socket
+        |> assign(page_title: "Edit chat room", room: room)
+        |> assign_form(Chat.get_room_changeset(room))
+      }
+    else
+      {:ok, socket
+        |> put_flash(:error, "You shall not pass.")
+        |> push_navigate(to: ~p"/")
+      }
+    end
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do

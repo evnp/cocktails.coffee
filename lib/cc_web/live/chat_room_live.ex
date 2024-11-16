@@ -32,7 +32,7 @@ defmodule CcWeb.ChatRoomLive do
               "group relative flex items-center h-8 text-sm",
               "pl-8 pr-3 hover:bg-slate-300 cursor-pointer w-full",
             ] do
-              c &icon/1, name: "hero-plus", class: "h-4 w-4 relative top-px"
+              c &icon/1, name: "hero-map", class: "h-4 w-4 relative top-px"
               span class: "ml-2 leading-none", do: "Explore"
               div class: [
                 "hidden group-focus:block cursor-default absolute top-8 right-2",
@@ -75,11 +75,13 @@ defmodule CcWeb.ChatRoomLive do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-sm font-bold leading-none" do
               "#" <> @room.name
-              c &link/1,
-                class: "font-normal text-xs text-blue-600 hover:text-blue-700",
-                navigate: ~p"/realms/#{@room}/edit"
-              do
-                c &icon/1, name: "hero-pencil", class: "h-4 w-4 ml-1 -mt-2"
+              if @joined_room? do
+                c &link/1,
+                  class: "font-normal text-xs text-blue-600 hover:text-blue-700",
+                  navigate: ~p"/realms/#{@room}/edit"
+                do
+                  c &icon/1, name: "hero-pencil", class: "h-4 w-4 ml-1 -mt-2"
+                end
               end
             end
             div class: "text-xs leading-none h-3.5 cursor-pointer",
@@ -161,36 +163,73 @@ defmodule CcWeb.ChatRoomLive do
               timezone: @timezone
           end
         end
-        div class: "h-14 shadow-2xl border-t" do
-          c &form/1,
-            id: "new-message-form",
-            class: "flex items-center",
-            for: @new_message_form,
-            "phx-change": "validate-message",
-            "phx-submit": "submit-message"
-          do
-            textarea id: "chat-message-textarea",
-              class: [
-                "flex-grow text-sm p-4 bg-transparent",
-                "resize-none border-none outline-none ring-0",
-                "focus:border-none focus:outline-none focus:ring-0",
-              ],
-              cols: "",
-              name: @new_message_form[:body].name,
-              placeholder: "Message ##{@room.name}",
-              "phx-debounce": true,
-              "phx-hook": "ChatMessageTextarea",
-              rows: "1"
+        if @joined_room? do
+          div class: "h-14 shadow-2xl border-t" do
+            c &form/1,
+              id: "new-message-form",
+              class: "flex items-center",
+              for: @new_message_form,
+              "phx-change": "validate-message",
+              "phx-submit": "submit-message"
             do
-              Phoenix.HTML.Form.normalize_value(
-                "textarea", @new_message_form[:body].value
-              )
+              textarea id: "chat-message-textarea",
+                class: [
+                  "flex-grow text-sm p-4 bg-transparent",
+                  "resize-none border-none outline-none ring-0",
+                  "focus:border-none focus:outline-none focus:ring-0",
+                ],
+                cols: "",
+                name: @new_message_form[:body].name,
+                placeholder: "Message ##{@room.name}",
+                "phx-debounce": true,
+                "phx-hook": "ChatMessageTextarea",
+                rows: "1"
+              do
+                Phoenix.HTML.Form.normalize_value(
+                  "textarea", @new_message_form[:body].value
+                )
+              end
+              button class: [
+                "h-8 w-8 mr-2 rounded flex-shrink flex items-center justify-center",
+                "hover:bg-slate-200 transition-colors",
+              ] do
+                c &icon/1, name: "hero-paper-airplane", class: "h-4 w-4"
+              end
             end
-            button class: [
-              "h-8 w-8 mr-2 rounded flex-shrink flex items-center justify-center",
-              "hover:bg-slate-200 transition-colors",
-            ] do
-              c &icon/1, name: "hero-paper-airplane", class: "h-4 w-4"
+          end
+        end
+        if !@joined_room? do
+          div class: [
+            "mx-5 mb-5 p-6 bg-slate-100 border-slate-300 border rounded-lg",
+            "flex justify-around",
+          ] do
+            div class: "max-w-3-xl text-center" do
+              div class: "mb-4" do
+                h1 class: "text-xl font-semibold", do: "##{@room.name}"
+                if @room.topic do
+                  p class: "text-sm mt-1 text-gray-600", do: @room.topic
+                end
+              end
+              div class: "flex items-center justify-around" do
+                button "phx-click": "join-room",
+                  class: [
+                    "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-600",
+                    "focus:outline-none focus:ring-2 focus:ring-green-500",
+                  ]
+                do
+                  "Enter realm"
+                end
+              end
+              div class: "mt-4" do
+                c &link/1,
+                  navigate: ~p"/realms",
+                  href: "#",
+                  class: "text-sm text-slate-500 underline hover:text-slate-600"
+                do
+                  "Go back to the shadow realm "
+                  c &icon/1, name: "hero-arrow-uturn-left", class: "h-4 w-4"
+                end
+              end
             end
           end
         end
@@ -298,7 +337,7 @@ defmodule CcWeb.ChatRoomLive do
 
     {:ok, assign(socket,
       users: Accounts.list_users(),
-      rooms: Chat.list_rooms(),
+      rooms: Chat.list_joined_rooms(socket.assigns.current_user),
       online_users: OnlineUsers.list(),
       timezone: timezone
     )}
@@ -321,6 +360,7 @@ defmodule CcWeb.ChatRoomLive do
       |> stream(:messages, Chat.list_messages_in_room(room), reset: true)
       |> assign(
         room: room,
+        joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
         hide_topic?: false,
         page_title: "Cocktails.Coffee. #" <> room.name,
         new_message_form: to_form(Chat.get_message_changeset(%Message{}))
@@ -344,13 +384,17 @@ defmodule CcWeb.ChatRoomLive do
   def handle_event("submit-message", %{"message" => data}, socket) do
     %{current_user: current_user, room: room} = socket.assigns
     {:noreply,
-      case Chat.create_message(room, data, current_user) do
-        {:ok, _message} -> assign(socket,
-          new_message_form: to_form(Chat.get_message_changeset(%Message{}))
-        )
-        {:error, changeset} -> assign(socket,
-          new_message_form: to_form(changeset)
-        )
+      if !Chat.joined_room?(room, current_user) do
+        socket
+      else
+        case Chat.create_message(room, data, current_user) do
+          {:ok, _message} -> assign(socket,
+            new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+          )
+          {:error, changeset} -> assign(socket,
+            new_message_form: to_form(changeset)
+          )
+        end
       end
     }
   end
@@ -358,6 +402,16 @@ defmodule CcWeb.ChatRoomLive do
   def handle_event("delete-message", %{"id" => id}, socket) do
     Chat.delete_message(id, socket.assigns.current_user)
     {:noreply, socket}
+  end
+
+  def handle_event("join-room", _, socket) do
+    current_user = socket.assigns.current_user
+    Chat.join_room!(socket.assigns.room, current_user)
+    Chat.room_pubsub_subscribe(socket.assigns.room)
+    {:noreply, assign(socket,
+      joined_room?: true,
+      rooms: Chat.list_joined_rooms(current_user)
+    )}
   end
 
   def handle_info({:new_message, message}, socket) do
