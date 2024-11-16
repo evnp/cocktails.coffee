@@ -68,9 +68,9 @@ defmodule CcWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{CcWeb.UserAuth, :ensure_authenticated}] do
 
-      live "/", ChatRoomLive
-      live "/home", ChatRoomLive
-      live "/realms", ChatRoomLive
+      live "/", ChatRoomLive.Index
+      live "/home", ChatRoomLive.Index
+      live "/realms", ChatRoomLive.Index
       live "/realms/:id", ChatRoomLive
       live "/realms/:id/edit", ChatRoomLive.Edit
       live "/users/settings", UserSettingsLive, :edit
