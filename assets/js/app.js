@@ -22,10 +22,12 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 
+import AutoClearFlash from "./hooks/AutoClearFlash";
 import ChatMessageTextarea from "./hooks/ChatMessageTextarea";
 import RoomMessages from "./hooks/RoomMessages";
 
 const hooks = {
+  AutoClearFlash,
   ChatMessageTextarea,
   RoomMessages,
 };
@@ -33,31 +35,13 @@ const hooks = {
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
+
 const liveSocket = new LiveSocket("/live", Socket, {
+  hooks,
   longPollFallbackMs: 2500,
   params: {
     _csrf_token: csrfToken,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  },
-  hooks: {
-    ...hooks,
-    // Clear flash messages automatically after 5 seconds:
-    AutoClearFlash: {
-      mounted() {
-        if (!["client-error", "server-error"].includes(this.el.id)) {
-          // Hide flash element after 3 seconds, with animation:
-          this.el.style.transition =
-            "opacity 0.3s ease-in, transform 0.5s ease-in";
-          this.el.style.opacity = 1;
-          setTimeout(() => {
-            this.el.style.opacity = 0;
-            this.el.style.transform = "translateY(-100px)";
-          }, 3_000);
-          // Clear flash message from the LiveView channel connection 0.5s later:
-          setTimeout(() => this.pushEvent("lv:clear-flash"), 3_500);
-        }
-      },
-    },
   },
 });
 
