@@ -1,8 +1,9 @@
 defmodule Cc.Chat do
-  alias Cc.Accounts.User
-  alias Cc.Chat.{Room, Message}
-  alias Cc.Repo
   import Ecto.Query
+
+  alias Cc.Accounts.User
+  alias Cc.Chat.{Room, Message, RoomMembership}
+  alias Cc.Repo
 
   @pubsub Cc.PubSub
 
@@ -86,5 +87,9 @@ defmodule Cc.Chat do
 
   def room_pubsub_unsubscribe(room) do
     Phoenix.PubSub.unsubscribe(@pubsub, room_pubsub_topic(room))
+  end
+
+  def join_room!(room, user) do
+    Repo.insert!(%RoomMembership{room: room, user: user})
   end
 end
