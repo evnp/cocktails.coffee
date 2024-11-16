@@ -13,7 +13,7 @@ defmodule CcWeb.ChatRoomLive.Index do
         end
         div class: "bg-slate-50 border rounded" do
           div id: "rooms", class: "divide-y", "phx-update": "stream" do
-            for {id, room} <- @streams.rooms do
+            for {id, {room, joined_room?}} <- @streams.rooms do
               div id: id,
                 class: [
                   "group p-4 cursor-pointer first:rounded-t last:rounded-b",
@@ -33,6 +33,12 @@ defmodule CcWeb.ChatRoomLive.Index do
                     end
                   end
                   div class: "text-gray-500 text-sm" do
+                    if joined_room? do
+                      span class: "text-green-600 font-bold", do: "✓ Joined"
+                    end
+                    if joined_room? && room.topic do
+                      span class: "mx-1", do: "·"
+                    end
                     if room.topic do
                       room.topic
                     end
@@ -49,7 +55,8 @@ defmodule CcWeb.ChatRoomLive.Index do
   def mount(_params, _session, socket) do
     {:ok, socket
       |> assign(page_title: "Realms")
-      |> stream(:rooms, Chat.list_rooms())
+      |> stream_configure(:rooms, dom_id: fn {room, _} -> "rooms-#{room.id}" end)
+      |> stream(:rooms, Chat.list_rooms(socket.assigns.current_user))
     }
   end
 end
