@@ -16,6 +16,7 @@ defmodule Cc.Application do
       {Finch, name: Cc.Finch},
       # Start a worker by calling: Cc.Worker.start_link(arg)
       # {Cc.Worker, arg},
+      CcWeb.Presence,
       # Start to serve requests, typically the last entry
       CcWeb.Endpoint
     ]

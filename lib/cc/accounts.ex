@@ -10,6 +10,10 @@ defmodule Cc.Accounts do
 
   ## Database getters
 
+  def list_users() do
+    Repo.all(from u in User, order_by: [asc: u.email])
+  end
+
   @doc """
   Gets a user by email.
 

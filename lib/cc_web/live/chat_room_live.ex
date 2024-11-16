@@ -1,9 +1,11 @@
 defmodule CcWeb.ChatRoomLive do
   use CcWeb, :live_view
 
+  alias Cc.Accounts
   alias Cc.Accounts.User
   alias Cc.Chat
   alias Cc.Chat.{Room, Message}
+  alias CcWeb.OnlineUsers
 
   def render(assigns) do
     temple do
@@ -25,6 +27,18 @@ defmodule CcWeb.ChatRoomLive do
           div id: "rooms-list" do
             for room <- @rooms do
               c &room_link/1, room: room, active: room.id == @room.id
+            end
+          end
+          div class: "mt-4" do
+            div class: "flex items-center h-8 px-3 group" do
+              div class: "flex items-center flex-grow focus:outline-none" do
+                span class: "ml-2 leading-none font-medium text-sm", do: "Characters"
+              end
+            end
+            div id: "users-list" do
+              for user <- @users do
+                c &user/1, user: user, online: OnlineUsers.online?(@online_users, user)
+              end
             end
           end
         end
@@ -211,6 +225,28 @@ defmodule CcWeb.ChatRoomLive do
     end
   end
 
+  attr :user, User, required: true
+  attr :online, :boolean, default: false
+  defp user(assigns) do
+    temple do
+      c &link/1,
+        class: "flex items-center h-8 hover:bg-gray-300 text-sm pl-8 pr-3",
+        href: "#"
+      do
+        div class: "flex justify-center w-4" do
+          if @online do
+            span class: "w-2 h-2 rounded-full bg-blue-500"
+          else
+            span class: "w-2 h-2 rounded-full border-2 border-gray-500"
+          end
+        end
+        span class: "ml-2 leading-none" do
+          username(@user)
+        end
+      end
+    end
+  end
+
   defp username(user) do
     user.email |> String.split("@") |> List.first() |> String.capitalize()
   end
@@ -230,7 +266,18 @@ defmodule CcWeb.ChatRoomLive do
 
     timezone = get_connect_params(socket)["timezone"]
 
-    {:ok, assign(socket, rooms: Chat.list_rooms(), timezone: timezone)}
+    if connected?(socket) do
+      OnlineUsers.track(self(), socket.assigns.current_user)
+    end
+
+    OnlineUsers.subscribe()
+
+    {:ok, assign(socket,
+      users: Accounts.list_users(),
+      rooms: Chat.list_rooms(),
+      online_users: OnlineUsers.list(),
+      timezone: timezone
+    )}
   end
 
   def handle_params(params, _session, socket) do
@@ -259,28 +306,27 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply,
-      assign(socket, hide_topic?: !socket.assigns.hide_topic?)
-    }
+    {:noreply, assign(socket,
+      hide_topic?: !socket.assigns.hide_topic?
+    )}
   end
 
-  def handle_event("validate-message", %{"message" => message_params}, socket) do
-    {:noreply,
-      assign(socket,
-        new_message_form:
-          to_form(Chat.get_message_changeset(%Message{}, message_params))
-      )
-    }
+  def handle_event("validate-message", %{"message" => data}, socket) do
+    {:noreply, assign(socket,
+      new_message_form: to_form(Chat.get_message_changeset(%Message{}, data))
+    )}
   end
 
-  def handle_event("submit-message", %{"message" => message_params}, socket) do
+  def handle_event("submit-message", %{"message" => data}, socket) do
     %{current_user: current_user, room: room} = socket.assigns
     {:noreply,
-      case Chat.create_message(room, message_params, current_user) do
-        {:ok, _message} -> socket
-          |> assign(new_message_form: to_form(Chat.get_message_changeset(%Message{})))
-        {:error, changeset} -> socket
-          |> assign(new_message_form: to_form(changeset))
+      case Chat.create_message(room, data, current_user) do
+        {:ok, _message} -> assign(socket,
+          new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+        )
+        {:error, changeset} -> assign(socket,
+          new_message_form: to_form(changeset)
+        )
       end
     }
   end
@@ -300,5 +346,11 @@ defmodule CcWeb.ChatRoomLive do
 
   def handle_info({:message_deleted, message}, socket) do
     {:noreply, stream_delete(socket, :messages, message)}
+  end
+
+  def handle_info(%{event: "presence_diff", payload: diff}, socket) do
+    {:noreply, assign(socket,
+      online_users: OnlineUsers.update(socket.assigns.online_users, diff)
+    )}
   end
 end
