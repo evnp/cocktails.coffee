@@ -12,7 +12,7 @@ defmodule CcWeb.ChatRoomLive.Index do
           end
         end
         div class: "bg-slate-50 border rounded" do
-          div id: "rooms", class: "divide-y", "phx-update": "stream" do
+          div id: "rooms", "phx-update": "stream", class: "divide-y" do
             for {id, {room, joined_room?}} <- @streams.rooms do
               div id: id,
                 class: [
@@ -44,6 +44,20 @@ defmodule CcWeb.ChatRoomLive.Index do
                     end
                   end
                 end
+                button "phx-click": "toggle-room-membership",
+                  "phx-value-id": room.id,
+                  class: [
+                    "opacity-0 group-hover:opacity-100 bg-white hover:bg-gray-100",
+                    "border border-gray-400 text-gray-700 px-3 py-1.5",
+                    "rounded-sm font-bold",
+                  ]
+                do
+                  if joined_room? do
+                    "Leave realm"
+                  else
+                    "Enter realm"
+                  end
+                end
               end
             end
           end
@@ -58,5 +72,14 @@ defmodule CcWeb.ChatRoomLive.Index do
       |> stream_configure(:rooms, dom_id: fn {room, _} -> "rooms-#{room.id}" end)
       |> stream(:rooms, Chat.list_rooms(socket.assigns.current_user))
     }
+  end
+
+  def handle_event("toggle-room-membership", %{"id" => id}, socket) do
+    {room, joined?} =
+      id
+      |> Chat.get_room!()
+      |> Chat.toggle_room_membership(socket.assigns.current_user)
+
+    {:noreply, stream_insert(socket, :rooms, {room, joined?})}
   end
 end
