@@ -156,11 +156,20 @@ defmodule CcWeb.ChatRoomLive do
           "phx-hook": "RoomMessages"
         do
           for {dom_id, message} <- @streams.messages do
-            c &message/1,
-              message: message,
-              current_user: @current_user,
-              dom_id: dom_id,
-              timezone: @timezone
+            if message == :unread_marker do
+              div id: dom_id, class: [
+                "w-full flex text-red-500 items-center gap-3 pr-5"
+              ] do
+                div class: "w-full h-px grow bg-red-500"
+                div class: "text-sm", do: "New"
+              end
+            else
+              c &message/1,
+                message: message,
+                current_user: @current_user,
+                dom_id: dom_id,
+                timezone: @timezone
+            end
           end
         end
         if @joined_room? do
@@ -320,6 +329,12 @@ defmodule CcWeb.ChatRoomLive do
     |> Timex.format!("%-l:%M %p", :strftime)
   end
 
+  defp maybe_insert_unread_marker(messages, nil), do: messages
+  defp maybe_insert_unread_marker(messages, last_read_message_id) do
+    {read, unread} = Enum.split_while(messages, &(&1.id <= last_read_message_id))
+    if unread == [] do read else read ++ [:unread_marker | unread] end
+  end
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       IO.puts("mounting (websocket connected)")
@@ -335,12 +350,20 @@ defmodule CcWeb.ChatRoomLive do
 
     OnlineUsers.subscribe()
 
-    {:ok, assign(socket,
-      users: Accounts.list_users(),
-      rooms: Chat.list_joined_rooms(socket.assigns.current_user),
-      online_users: OnlineUsers.list(),
-      timezone: timezone
-    )}
+    {:ok, socket
+      |> assign(
+        users: Accounts.list_users(),
+        rooms: Chat.list_joined_rooms(socket.assigns.current_user),
+        online_users: OnlineUsers.list(),
+        timezone: timezone
+      )
+      |> stream_configure(:messages,
+        dom_id: fn
+          %Message{id: id} -> "messages-#{id}"
+          :unread_marker -> "messages-unread-marker"
+        end
+      )
+    }
   end
 
   def handle_params(params, _session, socket) do
@@ -353,11 +376,17 @@ defmodule CcWeb.ChatRoomLive do
       :error -> Chat.get_first_room!(socket.assigns.rooms)
     end
 
-    Chat.room_pubsub_subscribe(room)
+    messages = room
+      |> Chat.list_messages_in_room()
+      |> maybe_insert_unread_marker(
+        Chat.get_last_read_message_id(room, socket.assigns.current_user)
+      )
 
-    {:noreply,
-      socket
-      |> stream(:messages, Chat.list_messages_in_room(room), reset: true)
+    Chat.room_pubsub_subscribe(room)
+    Chat.update_last_read_message_id(room, socket.assigns.current_user)
+
+    {:noreply, socket
+      |> stream(:messages, messages, reset: true)
       |> assign(
         room: room,
         joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
@@ -415,11 +444,13 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_info({:new_message, message}, socket) do
-    socket =
-      socket
+    if message.room_id == socket.assigns.room.id do
+      Chat.update_last_read_id(message.room, socket.assigns.current_user)
+    end
+    {:noreply, socket
       |> stream_insert(:messages, message)
       |> push_event("scroll_messages_to_bottom", %{})
-    {:noreply, socket}
+    }
   end
 
   def handle_info({:message_deleted, message}, socket) do
