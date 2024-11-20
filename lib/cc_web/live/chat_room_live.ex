@@ -25,8 +25,11 @@ defmodule CcWeb.ChatRoomLive do
             span class: "ml-2 leading-none font-medium text-sm", do: "Realms"
           end
           div id: "rooms-list" do
-            for room <- @rooms do
-              c &room_link/1, room: room, active: room.id == @room.id
+            for {room, unread_count} <- @rooms do
+              c &room_link/1,
+                room: room,
+                unread_count: unread_count,
+                active: room.id == @room.id
             end
             button class: [
               "group relative flex items-center h-8 text-sm",
@@ -248,6 +251,7 @@ defmodule CcWeb.ChatRoomLive do
 
   attr :active, :boolean, required: true
   attr :room, Room, required: true
+  attr :unread_count, :integer, required: true
   defp room_link(assigns) do
     temple do
       c &link/1, patch: ~p"/realms/#{@room}", class: [
@@ -256,6 +260,7 @@ defmodule CcWeb.ChatRoomLive do
       ] do
         c &icon/1, name: "hero-hashtag", class: "h-4 w-4"
         span class: ["ml-2 leading-none", @active && "font-bold"], do: @room.name
+        c &unread_message_counter/1, count: @unread_count
       end
     end
   end
@@ -292,6 +297,20 @@ defmodule CcWeb.ChatRoomLive do
             end
             p class: "text-sm", do: @message.body
           end
+        end
+      end
+    end
+  end
+
+  attr :count, :integer, required: true
+  defp unread_message_counter(assigns) do
+    temple do
+      if @count > 0 do
+        span class: [
+          "bg-blue-500 rounded-full font-medium h-5 px-2 ml-auto text-xs text-white",
+          "flex items-center justify-center",
+        ] do
+          @count
         end
       end
     end
@@ -348,12 +367,15 @@ defmodule CcWeb.ChatRoomLive do
       OnlineUsers.track(self(), socket.assigns.current_user)
     end
 
+    rooms = Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user)
+
     OnlineUsers.subscribe()
+    Enum.each(rooms, fn {room, _} -> Chat.room_pubsub_subscribe(room) end)
 
     {:ok, socket
       |> assign(
         users: Accounts.list_users(),
-        rooms: Chat.list_joined_rooms(socket.assigns.current_user),
+        rooms: rooms,
         online_users: OnlineUsers.list(),
         timezone: timezone
       )
@@ -367,10 +389,6 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_params(params, _session, socket) do
-    if socket.assigns[:room] do
-      Chat.room_pubsub_unsubscribe(socket.assigns.room)
-    end
-
     room = case params |> Map.fetch("id") do
       {:ok, id} -> Chat.get_room!(id)
       :error -> Chat.get_first_room!(socket.assigns.rooms)
@@ -382,7 +400,6 @@ defmodule CcWeb.ChatRoomLive do
         Chat.get_last_read_message_id(room, socket.assigns.current_user)
       )
 
-    Chat.room_pubsub_subscribe(room)
     Chat.update_last_read_message_id(room, socket.assigns.current_user)
 
     {:noreply, socket
@@ -395,6 +412,13 @@ defmodule CcWeb.ChatRoomLive do
         new_message_form: to_form(Chat.get_message_changeset(%Message{}))
       )
       |> push_event("scroll_messages_to_bottom", %{})
+      |> update(:rooms, fn rooms ->
+        room_id = room.id
+        Enum.map(rooms, fn
+          {%Room{id: ^room_id} = current_room, _} -> {current_room, 0}
+          other_room -> other_room
+        end)
+      end)
     }
   end
 
@@ -439,18 +463,31 @@ defmodule CcWeb.ChatRoomLive do
     Chat.room_pubsub_subscribe(socket.assigns.room)
     {:noreply, assign(socket,
       joined_room?: true,
-      rooms: Chat.list_joined_rooms(current_user)
+      rooms: Chat.list_joined_rooms_with_unread_counts(current_user)
     )}
   end
 
   def handle_info({:new_message, message}, socket) do
-    if message.room_id == socket.assigns.room.id do
-      Chat.update_last_read_id(message.room, socket.assigns.current_user)
+    room = socket.assigns.room
+    socket = cond do
+      message.room_id == room.id ->
+        Chat.update_last_read_message_id(room, socket.assigns.current_user)
+        socket
+        |> stream_insert(:messages, message)
+        |> push_event("scroll_messages_to_bottom", %{})
+
+      message.user_id != socket.assigns.current_user.id ->
+        socket
+        |> update(:rooms, fn rooms ->
+          Enum.map(rooms, fn
+            {%Room{id: id} = room, count} when id == message.room_id -> {room, count + 1}
+            other -> other
+          end)
+        end)
+
+      true -> socket
     end
-    {:noreply, socket
-      |> stream_insert(:messages, message)
-      |> push_event("scroll_messages_to_bottom", %{})
-    }
+    {:noreply, socket}
   end
 
   def handle_info({:message_deleted, message}, socket) do
