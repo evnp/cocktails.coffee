@@ -279,7 +279,7 @@ defmodule CcWeb.ChatRoomLive do
             c &icon/1, name: "hero-trash", class: "h-4 w-4"
           end
         end
-        div class: "h-10 w-10 rounded flex-shrink-0 bg-slate-300"
+        img class: "h-10 w-10 rounded flex-shrink-0", src: ~p"/images/one_ring.jpg"
         div class: "ml-2" do
           div class: "-mt-1" do
             c &link/1, class: "text-sm font-semibold hover:underline" do
@@ -332,7 +332,7 @@ defmodule CcWeb.ChatRoomLive do
   defp maybe_insert_unread_marker(messages, nil), do: messages
   defp maybe_insert_unread_marker(messages, last_read_message_id) do
     {read, unread} = Enum.split_while(messages, &(&1.id <= last_read_message_id))
-    if unread == [] do read else read ++ [:unread_marker | unread] end
+    if unread == [] do read else read ++ [:unread_marker] ++ unread end
   end
 
   def mount(_params, _session, socket) do
