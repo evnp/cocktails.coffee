@@ -21,8 +21,11 @@ defmodule CcWeb.ChatRoomLive do
           end
         end
         div class: "mt-4 overflow-auto" do
-          div class: "flex items-center h-8 px-3" do
-            span class: "ml-2 leading-none font-medium text-sm", do: "Realms"
+          div class: "flex items-center h-8 px-3 cursor-pointer select-none" do
+            c &toggler/1,
+              dom_id: "rooms-toggler",
+              text: "Realms",
+              "on_click": toggle_rooms()
           end
           div id: "rooms-list" do
             for {room, unread_count} <- @rooms do
@@ -59,7 +62,10 @@ defmodule CcWeb.ChatRoomLive do
           div class: "mt-4" do
             div class: "flex items-center h-8 px-3 group" do
               div class: "flex items-center flex-grow focus:outline-none" do
-                span class: "ml-2 leading-none font-medium text-sm", do: "Characters"
+              c &toggler/1,
+                dom_id: "users-toggler",
+                text: "Users",
+                "on_click": toggle_users()
               end
             end
             div id: "users-list" do
@@ -247,6 +253,43 @@ defmodule CcWeb.ChatRoomLive do
         end
       end
     end
+  end
+
+  attr :dom_id, :string, required: true
+  attr :text, :string, required: true
+  attr :on_click, JS, required: true
+  defp toggler(assigns) do
+    temple do
+      button id: @dom_id,
+        class: "flex items-center flex-grow focus:outline-none",
+        "phx-click": @on_click
+      do
+        c &icon/1,
+          id: @dom_id <> "-chevron-down",
+          name: "hero-chevron-down",
+          class: "h-4 w-4"
+        c &icon/1,
+          id: @dom_id <> "-chevron-right",
+          name: "hero-chevron-right",
+          class: "h-4 w-4",
+          style: "display:none;"
+        span class: "ml-2 leading-none font-medium text-sm" do
+          @text
+        end
+      end
+    end
+  end
+
+  defp toggle_rooms() do
+    JS.toggle(to: "#rooms-toggler-chevron-down")
+    |> JS.toggle(to: "#rooms-toggler-chevron-right")
+    |> JS.toggle(to: "#rooms-list")
+  end
+
+  defp toggle_users() do
+    JS.toggle(to: "#users-toggler-chevron-down")
+    |> JS.toggle(to: "#users-toggler-chevron-right")
+    |> JS.toggle(to: "#users-list")
   end
 
   attr :active, :boolean, required: true
