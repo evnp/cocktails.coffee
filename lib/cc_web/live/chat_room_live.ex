@@ -25,7 +25,7 @@ defmodule CcWeb.ChatRoomLive do
             c &toggler/1,
               dom_id: "rooms-toggler",
               text: "Realms",
-              "on_click": toggle_rooms()
+              on_click: toggle_rooms()
           end
           div id: "rooms-list" do
             for {room, unread_count} <- @rooms do
@@ -56,6 +56,16 @@ defmodule CcWeb.ChatRoomLive do
                     end
                   end
                 end
+                div class: "hover:bg-sky-600" do
+                  div "phx-click": show_modal("new-room-modal"),
+                    class: [
+                      "cursor-pointer whitespace-nowrap text-gray-800",
+                      "hover:text-white px-6 py-1 block"
+                    ]
+                  do
+                    "Create a new realm"
+                  end
+                end
               end
             end
           end
@@ -65,7 +75,7 @@ defmodule CcWeb.ChatRoomLive do
               c &toggler/1,
                 dom_id: "users-toggler",
                 text: "Users",
-                "on_click": toggle_users()
+                on_click: toggle_users()
               end
             end
             div id: "users-list" do
@@ -251,6 +261,12 @@ defmodule CcWeb.ChatRoomLive do
             end
           end
         end
+      end
+      c &modal/1, id: "new-room-modal" do
+        c &header/1 do
+          "New realm"
+        end
+        "(Form goes here)"
       end
     end
   end
