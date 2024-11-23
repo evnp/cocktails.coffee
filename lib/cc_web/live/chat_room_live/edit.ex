@@ -46,7 +46,7 @@ defmodule CcWeb.ChatRoomLive.Edit do
     if Chat.joined_room?(room, socket.assigns.current_user) do
       {:ok, socket
         |> assign(page_title: "Edit chat room", room: room)
-        |> assign_form(Chat.get_room_changeset(room))
+        |> assign_room_form(Chat.get_room_changeset(room))
       }
     else
       {:ok, socket
@@ -57,10 +57,12 @@ defmodule CcWeb.ChatRoomLive.Edit do
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do
-    changeset = socket.assigns.room
-      |> Chat.get_room_changeset(room_params)
-      |> Map.put(:action, :validate)
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, socket
+      |> assign_room_form(socket.assigns.room
+        |> Chat.get_room_changeset(room_params)
+        |> Map.put(:action, :validate)
+      )
+    }
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
@@ -70,12 +72,12 @@ defmodule CcWeb.ChatRoomLive.Edit do
         |> push_navigate(to: ~p"/realms/#{room}")
       }
       {:error, %Ecto.Changeset{} = changeset} -> {:noreply,
-        assign_form(socket, changeset)
+        assign_room_form(socket, changeset)
       }
     end
   end
 
-  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+  defp assign_room_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
   end
 end

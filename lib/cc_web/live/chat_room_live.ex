@@ -266,7 +266,26 @@ defmodule CcWeb.ChatRoomLive do
         c &header/1 do
           "New realm"
         end
-        "(Form goes here)"
+        c &simple_form/1,
+          id: "room-form",
+          for: @new_room_form,
+          "phx-change": "validate-room",
+          "phx-submit": "save-room"
+        do
+          slot :actions do
+            c &button/1, "phx-disable-with": "Saving...", class: "w-full", do: "Save"
+          end
+          c &input/1,
+            field: @new_room_form[:name],
+            type: "text",
+            label: "Name",
+            "phx-debounce": true
+          c &input/1,
+            field: @new_room_form[:topic],
+            type: "text",
+            label: "Topic",
+            "phx-debounce": true
+        end
       end
     end
   end
@@ -413,6 +432,10 @@ defmodule CcWeb.ChatRoomLive do
     if unread == [] do read else read ++ [:unread_marker] ++ unread end
   end
 
+  defp assign_room_form(socket, changeset) do
+    assign(socket, :new_room_form, to_form(changeset))
+  end
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       IO.puts("mounting (websocket connected)")
@@ -438,6 +461,7 @@ defmodule CcWeb.ChatRoomLive do
         online_users: OnlineUsers.list(),
         timezone: timezone
       )
+      |> assign_room_form(Chat.get_room_changeset(%Room{}))
       |> stream_configure(:messages,
         dom_id: fn
           %Message{id: id} -> "messages-#{id}"
@@ -526,6 +550,28 @@ defmodule CcWeb.ChatRoomLive do
     )}
   end
 
+  def handle_event("validate-room", %{"room" => room_params}, socket) do
+    {:noreply, socket
+      |> assign_room_form(socket.assigns.room
+        |> Chat.get_room_changeset(room_params)
+        |> Map.put(:action, :validate)
+      )
+    }
+  end
+
+  def handle_event("save-room", %{"room" => room_params}, socket) do
+    case Chat.create_room(room_params) do
+      {:ok, room} ->
+        Chat.join_room!(room, socket.assigns.current_user)
+        {:noreply, socket
+          |> put_flash(:info, "Created realm")
+          |> push_navigate(to: ~p"/realms/#{room}")
+        }
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, socket |> assign_room_form(changeset)}
+    end
+  end
+
   def handle_info({:new_message, message}, socket) do
     room = socket.assigns.room
     socket = cond do
@@ -539,8 +585,10 @@ defmodule CcWeb.ChatRoomLive do
         socket
         |> update(:rooms, fn rooms ->
           Enum.map(rooms, fn
-            {%Room{id: id} = room, count} when id == message.room_id -> {room, count + 1}
-            other -> other
+            {%Room{id: id} = room, count} when id == message.room_id ->
+              {room, count + 1}
+            other ->
+              other
           end)
         end)
 

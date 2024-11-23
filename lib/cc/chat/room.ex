@@ -2,6 +2,7 @@ defmodule Cc.Chat.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Cc.Accounts.User
   alias Cc.Chat.{Message, RoomMembership}
 
   schema "rooms" do
