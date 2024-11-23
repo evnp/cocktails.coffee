@@ -26,6 +26,7 @@ defmodule CcWeb.OnlineUsers do
   def online?(online_users, %User{id: user_id}) do
     online?(online_users, user_id)
   end
+
   def online?(online_users, user_id) do
     Map.get(online_users, user_id, 0) > 0
   end

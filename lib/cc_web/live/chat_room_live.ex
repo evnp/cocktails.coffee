@@ -11,15 +11,16 @@ defmodule CcWeb.ChatRoomLive do
     temple do
       div class: "flex flex-col flex-shrink-0 w-64 bg-slate-100" do
         div class: [
-          "h-16 px-4",
-          "flex justify-between items-center flex-shrink-0",
-        ] do
+              "h-16 px-4",
+              "flex justify-between items-center flex-shrink-0"
+            ] do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-lg font-bold text-gray-800" do
               "Middle Earth"
             end
           end
         end
+
         div class: "mt-4 overflow-auto" do
           div class: "flex items-center h-8 px-3 cursor-pointer select-none" do
             c &toggler/1,
@@ -27,6 +28,7 @@ defmodule CcWeb.ChatRoomLive do
               text: "Realms",
               on_click: toggle_rooms()
           end
+
           div id: "rooms-list" do
             for {room, unread_count} <- @rooms do
               c &room_link/1,
@@ -34,50 +36,53 @@ defmodule CcWeb.ChatRoomLive do
                 unread_count: unread_count,
                 active: room.id == @room.id
             end
+
             button class: [
-              "group relative flex items-center h-8 text-sm",
-              "pl-8 pr-3 hover:bg-slate-300 cursor-pointer w-full",
-            ] do
+                     "group relative flex items-center h-8 text-sm",
+                     "pl-8 pr-3 hover:bg-slate-300 cursor-pointer w-full"
+                   ] do
               c &icon/1, name: "hero-map", class: "h-4 w-4 relative top-px"
               span class: "ml-2 leading-none", do: "Explore"
+
               div class: [
-                "hidden group-focus:block cursor-default absolute top-8 right-2",
-                "bg-white border-slate-200 border py-3 rounded-lg",
-              ] do
+                    "hidden group-focus:block cursor-default absolute top-8 right-2",
+                    "bg-white border-slate-200 border py-3 rounded-lg"
+                  ] do
                 div class: "w-full text-left" do
                   div class: "hover:bg-sky-600" do
                     div "phx-click": JS.navigate(~p"/realms"),
-                      class: [
-                        "cursor-pointer whitespace-nowrap text-gray-800",
-                        "hover:text-white px-6 py-1",
-                      ]
-                    do
+                        class: [
+                          "cursor-pointer whitespace-nowrap text-gray-800",
+                          "hover:text-white px-6 py-1"
+                        ] do
                       "World map"
                     end
                   end
                 end
+
                 div class: "hover:bg-sky-600" do
                   div "phx-click": show_modal("new-room-modal"),
-                    class: [
-                      "cursor-pointer whitespace-nowrap text-gray-800",
-                      "hover:text-white px-6 py-1 block"
-                    ]
-                  do
+                      class: [
+                        "cursor-pointer whitespace-nowrap text-gray-800",
+                        "hover:text-white px-6 py-1 block"
+                      ] do
                     "Create a new realm"
                   end
                 end
               end
             end
           end
+
           div class: "mt-4" do
             div class: "flex items-center h-8 px-3 group" do
               div class: "flex items-center flex-grow focus:outline-none" do
-              c &toggler/1,
-                dom_id: "users-toggler",
-                text: "Users",
-                on_click: toggle_users()
+                c &toggler/1,
+                  dom_id: "users-toggler",
+                  text: "Users",
+                  on_click: toggle_users()
               end
             end
+
             div id: "users-list" do
               for user <- @users do
                 c &user/1, user: user, online: OnlineUsers.online?(@online_users, user)
@@ -86,26 +91,27 @@ defmodule CcWeb.ChatRoomLive do
           end
         end
       end
+
       div class: "flex flex-col flex-grow shadow-lg" do
         div class: [
-          "h-16 px-4 shadow",
-          "flex justify-between items-center flex-shrink-0",
-        ] do
+              "h-16 px-4 shadow",
+              "flex justify-between items-center flex-shrink-0"
+            ] do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-sm font-bold leading-none" do
               "#" <> @room.name
+
               if @joined_room? do
                 c &link/1,
                   class: "font-normal text-xs text-blue-600 hover:text-blue-700",
-                  navigate: ~p"/realms/#{@room}/edit"
-                do
+                  navigate: ~p"/realms/#{@room}/edit" do
                   c &icon/1, name: "hero-pencil", class: "h-4 w-4 ml-1 -mt-2"
                 end
               end
             end
+
             div class: "text-xs leading-none h-3.5 cursor-pointer",
-              "phx-click": "toggle-topic"
-            do
+                "phx-click": "toggle-topic" do
               if @hide_topic? do
                 span class: "text-slate-600", do: "[Topic hidden]"
               else
@@ -113,33 +119,34 @@ defmodule CcWeb.ChatRoomLive do
               end
             end
           end
+
           ul class: [
-            "relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end"
-          ] do
+               "relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end"
+             ] do
             if @current_user do
               li class: "text-[0.8125rem] leading-6 text-zinc-900" do
                 username(@current_user)
               end
+
               li do
                 c &link/1,
                   href: ~p"/users/settings",
                   class: [
                     "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700",
-                  ]
-                do
+                    "font-semibold hover:text-zinc-700"
+                  ] do
                   "Settings"
                 end
               end
+
               li do
                 c &link/1,
                   href: ~p"/users/logout",
                   method: "delete",
                   class: [
                     "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700",
-                  ]
-                do
+                    "font-semibold hover:text-zinc-700"
+                  ] do
                   "Log out"
                 end
               end
@@ -149,36 +156,36 @@ defmodule CcWeb.ChatRoomLive do
                   href: ~p"/users/register",
                   class: [
                     "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700",
-                  ]
-                do
+                    "font-semibold hover:text-zinc-700"
+                  ] do
                   "Register"
                 end
               end
+
               li do
                 c &link/1,
                   href: ~p"/users/login",
                   class: [
                     "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700",
-                  ]
-                do
+                    "font-semibold hover:text-zinc-700"
+                  ] do
                   "Log in"
                 end
               end
             end
           end
         end
+
         div id: "room-messages",
-          class: "flex flex-col flex-grow overflow-auto",
-          "phx-update": "stream",
-          "phx-hook": "RoomMessages"
-        do
+            class: "flex flex-col flex-grow overflow-auto",
+            "phx-update": "stream",
+            "phx-hook": "RoomMessages" do
           for {dom_id, message} <- @streams.messages do
             if message == :unread_marker do
-              div id: dom_id, class: [
-                "w-full flex text-red-500 items-center gap-3 pr-5"
-              ] do
+              div id: dom_id,
+                  class: [
+                    "w-full flex text-red-500 items-center gap-3 pr-5"
+                  ] do
                 div class: "w-full h-px grow bg-red-500"
                 div class: "text-sm", do: "New"
               end
@@ -191,6 +198,7 @@ defmodule CcWeb.ChatRoomLive do
             end
           end
         end
+
         if @joined_room? do
           div class: "h-14 shadow-2xl border-t" do
             c &form/1,
@@ -198,62 +206,64 @@ defmodule CcWeb.ChatRoomLive do
               class: "flex items-center",
               for: @new_message_form,
               "phx-change": "validate-message",
-              "phx-submit": "submit-message"
-            do
+              "phx-submit": "submit-message" do
               textarea id: "chat-message-textarea",
-                class: [
-                  "flex-grow text-sm p-4 bg-transparent",
-                  "resize-none border-none outline-none ring-0",
-                  "focus:border-none focus:outline-none focus:ring-0",
-                ],
-                cols: "",
-                name: @new_message_form[:body].name,
-                placeholder: "Message ##{@room.name}",
-                "phx-debounce": true,
-                "phx-hook": "ChatMessageTextarea",
-                rows: "1"
-              do
+                       class: [
+                         "flex-grow text-sm p-4 bg-transparent",
+                         "resize-none border-none outline-none ring-0",
+                         "focus:border-none focus:outline-none focus:ring-0"
+                       ],
+                       cols: "",
+                       name: @new_message_form[:body].name,
+                       placeholder: "Message ##{@room.name}",
+                       "phx-debounce": true,
+                       "phx-hook": "ChatMessageTextarea",
+                       rows: "1" do
                 Phoenix.HTML.Form.normalize_value(
-                  "textarea", @new_message_form[:body].value
+                  "textarea",
+                  @new_message_form[:body].value
                 )
               end
+
               button class: [
-                "h-8 w-8 mr-2 rounded flex-shrink flex items-center justify-center",
-                "hover:bg-slate-200 transition-colors",
-              ] do
+                       "h-8 w-8 mr-2 rounded flex-shrink flex items-center justify-center",
+                       "hover:bg-slate-200 transition-colors"
+                     ] do
                 c &icon/1, name: "hero-paper-airplane", class: "h-4 w-4"
               end
             end
           end
         end
+
         if !@joined_room? do
           div class: [
-            "mx-5 mb-5 p-6 bg-slate-100 border-slate-300 border rounded-lg",
-            "flex justify-around",
-          ] do
+                "mx-5 mb-5 p-6 bg-slate-100 border-slate-300 border rounded-lg",
+                "flex justify-around"
+              ] do
             div class: "max-w-3-xl text-center" do
               div class: "mb-4" do
                 h1 class: "text-xl font-semibold", do: "##{@room.name}"
+
                 if @room.topic do
                   p class: "text-sm mt-1 text-gray-600", do: @room.topic
                 end
               end
+
               div class: "flex items-center justify-around" do
                 button "phx-click": "join-room",
-                  class: [
-                    "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-600",
-                    "focus:outline-none focus:ring-2 focus:ring-green-500",
-                  ]
-                do
+                       class: [
+                         "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-600",
+                         "focus:outline-none focus:ring-2 focus:ring-green-500"
+                       ] do
                   "Enter realm"
                 end
               end
+
               div class: "mt-4" do
                 c &link/1,
                   navigate: ~p"/realms",
                   href: "#",
-                  class: "text-sm text-slate-500 underline hover:text-slate-600"
-                do
+                  class: "text-sm text-slate-500 underline hover:text-slate-600" do
                   "Go back to the shadow realm "
                   c &icon/1, name: "hero-arrow-uturn-left", class: "h-4 w-4"
                 end
@@ -262,24 +272,27 @@ defmodule CcWeb.ChatRoomLive do
           end
         end
       end
+
       c &modal/1, id: "new-room-modal" do
         c &header/1 do
           "New realm"
         end
+
         c &simple_form/1,
           id: "room-form",
           for: @new_room_form,
           "phx-change": "validate-room",
-          "phx-submit": "save-room"
-        do
+          "phx-submit": "save-room" do
           slot :actions do
             c &button/1, "phx-disable-with": "Saving...", class: "w-full", do: "Save"
           end
+
           c &input/1,
             field: @new_room_form[:name],
             type: "text",
             label: "Name",
             "phx-debounce": true
+
           c &input/1,
             field: @new_room_form[:topic],
             type: "text",
@@ -293,21 +306,23 @@ defmodule CcWeb.ChatRoomLive do
   attr :dom_id, :string, required: true
   attr :text, :string, required: true
   attr :on_click, JS, required: true
+
   defp toggler(assigns) do
     temple do
       button id: @dom_id,
-        class: "flex items-center flex-grow focus:outline-none",
-        "phx-click": @on_click
-      do
+             class: "flex items-center flex-grow focus:outline-none",
+             "phx-click": @on_click do
         c &icon/1,
           id: @dom_id <> "-chevron-down",
           name: "hero-chevron-down",
           class: "h-4 w-4"
+
         c &icon/1,
           id: @dom_id <> "-chevron-right",
           name: "hero-chevron-right",
           class: "h-4 w-4",
           style: "display:none;"
+
         span class: "ml-2 leading-none font-medium text-sm" do
           @text
         end
@@ -330,12 +345,15 @@ defmodule CcWeb.ChatRoomLive do
   attr :active, :boolean, required: true
   attr :room, Room, required: true
   attr :unread_count, :integer, required: true
+
   defp room_link(assigns) do
     temple do
-      c &link/1, patch: ~p"/realms/#{@room}", class: [
-        "flex items-center h-8 text-sm pl-8 pr-3",
-        (if @active, do: "bg-slate-300", else: "hover:bg-slate-300")
-      ] do
+      c &link/1,
+        patch: ~p"/realms/#{@room}",
+        class: [
+          "flex items-center h-8 text-sm pl-8 pr-3",
+          if(@active, do: "bg-slate-300", else: "hover:bg-slate-300")
+        ] do
         c &icon/1, name: "hero-hashtag", class: "h-4 w-4"
         span class: ["ml-2 leading-none", @active && "font-bold"], do: @room.name
         c &unread_message_counter/1, count: @unread_count
@@ -347,32 +365,36 @@ defmodule CcWeb.ChatRoomLive do
   attr :current_user, User, required: true
   attr :dom_id, :string, required: true
   attr :timezone, :string, required: true
+
   defp message(assigns) do
     temple do
       div id: @dom_id, class: "group relative flex px-4 py-3" do
         if @current_user.id == @message.user_id do
           button "phx-click": "delete-message",
-            "phx-value-id": @message.id,
-            "data-confirm": "Are you sure?",
-            class: [
-              "absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer",
-              "opacity-0 group-hover:opacity-100 transition"
-            ]
-          do
+                 "phx-value-id": @message.id,
+                 "data-confirm": "Are you sure?",
+                 class: [
+                   "absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer",
+                   "opacity-0 group-hover:opacity-100 transition"
+                 ] do
             c &icon/1, name: "hero-trash", class: "h-4 w-4"
           end
         end
+
         img class: "h-10 w-10 rounded flex-shrink-0", src: ~p"/images/one_ring.jpg"
+
         div class: "ml-2" do
           div class: "-mt-1" do
             c &link/1, class: "text-sm font-semibold hover:underline" do
               span do: username(@message.user)
             end
+
             if @timezone do
               span class: "ml-1 text-xs text-gray-500" do
                 message_timestamp(@message, @timezone)
               end
             end
+
             p class: "text-sm", do: @message.body
           end
         end
@@ -381,13 +403,14 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   attr :count, :integer, required: true
+
   defp unread_message_counter(assigns) do
     temple do
       if @count > 0 do
         span class: [
-          "bg-blue-500 rounded-full font-medium h-5 px-2 ml-auto text-xs text-white",
-          "flex items-center justify-center",
-        ] do
+               "bg-blue-500 rounded-full font-medium h-5 px-2 ml-auto text-xs text-white",
+               "flex items-center justify-center"
+             ] do
           @count
         end
       end
@@ -396,12 +419,12 @@ defmodule CcWeb.ChatRoomLive do
 
   attr :user, User, required: true
   attr :online, :boolean, default: false
+
   defp user(assigns) do
     temple do
       c &link/1,
         class: "flex items-center h-8 hover:bg-gray-300 text-sm pl-8 pr-3",
-        href: "#"
-      do
+        href: "#" do
         div class: "flex justify-center w-4" do
           if @online do
             span class: "w-2 h-2 rounded-full bg-blue-500"
@@ -409,6 +432,7 @@ defmodule CcWeb.ChatRoomLive do
             span class: "w-2 h-2 rounded-full border-2 border-gray-500"
           end
         end
+
         span class: "ml-2 leading-none" do
           username(@user)
         end
@@ -427,9 +451,15 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   defp maybe_insert_unread_marker(messages, nil), do: messages
+
   defp maybe_insert_unread_marker(messages, last_read_message_id) do
     {read, unread} = Enum.split_while(messages, &(&1.id <= last_read_message_id))
-    if unread == [] do read else read ++ [:unread_marker] ++ unread end
+
+    if unread == [] do
+      read
+    else
+      read ++ [:unread_marker] ++ unread
+    end
   end
 
   defp assign_room_form(socket, changeset) do
@@ -454,30 +484,32 @@ defmodule CcWeb.ChatRoomLive do
     OnlineUsers.subscribe()
     Enum.each(rooms, fn {room, _} -> Chat.room_pubsub_subscribe(room) end)
 
-    {:ok, socket
-      |> assign(
-        users: Accounts.list_users(),
-        rooms: rooms,
-        online_users: OnlineUsers.list(),
-        timezone: timezone
-      )
-      |> assign_room_form(Chat.get_room_changeset(%Room{}))
-      |> stream_configure(:messages,
-        dom_id: fn
-          %Message{id: id} -> "messages-#{id}"
-          :unread_marker -> "messages-unread-marker"
-        end
-      )
-    }
+    {:ok,
+     socket
+     |> assign(
+       users: Accounts.list_users(),
+       rooms: rooms,
+       online_users: OnlineUsers.list(),
+       timezone: timezone
+     )
+     |> assign_room_form(Chat.get_room_changeset(%Room{}))
+     |> stream_configure(:messages,
+       dom_id: fn
+         %Message{id: id} -> "messages-#{id}"
+         :unread_marker -> "messages-unread-marker"
+       end
+     )}
   end
 
   def handle_params(params, _session, socket) do
-    room = case params |> Map.fetch("id") do
-      {:ok, id} -> Chat.get_room!(id)
-      :error -> Chat.get_first_room!(socket.assigns.rooms)
-    end
+    room =
+      case params |> Map.fetch("id") do
+        {:ok, id} -> Chat.get_room!(id)
+        :error -> Chat.get_first_room!(socket.assigns.rooms)
+      end
 
-    messages = room
+    messages =
+      room
       |> Chat.list_messages_in_room()
       |> maybe_insert_unread_marker(
         Chat.get_last_read_message_id(room, socket.assigns.current_user)
@@ -485,54 +517,60 @@ defmodule CcWeb.ChatRoomLive do
 
     Chat.update_last_read_message_id(room, socket.assigns.current_user)
 
-    {:noreply, socket
-      |> stream(:messages, messages, reset: true)
-      |> assign(
-        room: room,
-        joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
-        hide_topic?: false,
-        page_title: "Cocktails.Coffee. #" <> room.name,
-        new_message_form: to_form(Chat.get_message_changeset(%Message{}))
-      )
-      |> push_event("scroll_messages_to_bottom", %{})
-      |> update(:rooms, fn rooms ->
-        room_id = room.id
-        Enum.map(rooms, fn
-          {%Room{id: ^room_id} = current_room, _} -> {current_room, 0}
-          other_room -> other_room
-        end)
-      end)
-    }
+    {:noreply,
+     socket
+     |> stream(:messages, messages, reset: true)
+     |> assign(
+       room: room,
+       joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
+       hide_topic?: false,
+       page_title: "Cocktails.Coffee. #" <> room.name,
+       new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+     )
+     |> push_event("scroll_messages_to_bottom", %{})
+     |> update(:rooms, fn rooms ->
+       room_id = room.id
+
+       Enum.map(rooms, fn
+         {%Room{id: ^room_id} = current_room, _} -> {current_room, 0}
+         other_room -> other_room
+       end)
+     end)}
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply, assign(socket,
-      hide_topic?: !socket.assigns.hide_topic?
-    )}
+    {:noreply,
+     assign(socket,
+       hide_topic?: !socket.assigns.hide_topic?
+     )}
   end
 
   def handle_event("validate-message", %{"message" => data}, socket) do
-    {:noreply, assign(socket,
-      new_message_form: to_form(Chat.get_message_changeset(%Message{}, data))
-    )}
+    {:noreply,
+     assign(socket,
+       new_message_form: to_form(Chat.get_message_changeset(%Message{}, data))
+     )}
   end
 
   def handle_event("submit-message", %{"message" => data}, socket) do
     %{current_user: current_user, room: room} = socket.assigns
+
     {:noreply,
-      if !Chat.joined_room?(room, current_user) do
-        socket
-      else
-        case Chat.create_message(room, data, current_user) do
-          {:ok, _message} -> assign(socket,
-            new_message_form: to_form(Chat.get_message_changeset(%Message{}))
-          )
-          {:error, changeset} -> assign(socket,
-            new_message_form: to_form(changeset)
-          )
-        end
-      end
-    }
+     if !Chat.joined_room?(room, current_user) do
+       socket
+     else
+       case Chat.create_message(room, data, current_user) do
+         {:ok, _message} ->
+           assign(socket,
+             new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+           )
+
+         {:error, changeset} ->
+           assign(socket,
+             new_message_form: to_form(changeset)
+           )
+       end
+     end}
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
@@ -544,29 +582,34 @@ defmodule CcWeb.ChatRoomLive do
     current_user = socket.assigns.current_user
     Chat.join_room!(socket.assigns.room, current_user)
     Chat.room_pubsub_subscribe(socket.assigns.room)
-    {:noreply, assign(socket,
-      joined_room?: true,
-      rooms: Chat.list_joined_rooms_with_unread_counts(current_user)
-    )}
+
+    {:noreply,
+     assign(socket,
+       joined_room?: true,
+       rooms: Chat.list_joined_rooms_with_unread_counts(current_user)
+     )}
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do
-    {:noreply, socket
-      |> assign_room_form(socket.assigns.room
-        |> Chat.get_room_changeset(room_params)
-        |> Map.put(:action, :validate)
-      )
-    }
+    {:noreply,
+     socket
+     |> assign_room_form(
+       socket.assigns.room
+       |> Chat.get_room_changeset(room_params)
+       |> Map.put(:action, :validate)
+     )}
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
     case Chat.create_room(room_params) do
       {:ok, room} ->
         Chat.join_room!(room, socket.assigns.current_user)
-        {:noreply, socket
-          |> put_flash(:info, "Created realm")
-          |> push_navigate(to: ~p"/realms/#{room}")
-        }
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Created realm")
+         |> push_navigate(to: ~p"/realms/#{room}")}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign_room_form(changeset)}
     end
@@ -574,26 +617,32 @@ defmodule CcWeb.ChatRoomLive do
 
   def handle_info({:new_message, message}, socket) do
     room = socket.assigns.room
-    socket = cond do
-      message.room_id == room.id ->
-        Chat.update_last_read_message_id(room, socket.assigns.current_user)
-        socket
-        |> stream_insert(:messages, message)
-        |> push_event("scroll_messages_to_bottom", %{})
 
-      message.user_id != socket.assigns.current_user.id ->
-        socket
-        |> update(:rooms, fn rooms ->
-          Enum.map(rooms, fn
-            {%Room{id: id} = room, count} when id == message.room_id ->
-              {room, count + 1}
-            other ->
-              other
+    socket =
+      cond do
+        message.room_id == room.id ->
+          Chat.update_last_read_message_id(room, socket.assigns.current_user)
+
+          socket
+          |> stream_insert(:messages, message)
+          |> push_event("scroll_messages_to_bottom", %{})
+
+        message.user_id != socket.assigns.current_user.id ->
+          socket
+          |> update(:rooms, fn rooms ->
+            Enum.map(rooms, fn
+              {%Room{id: id} = room, count} when id == message.room_id ->
+                {room, count + 1}
+
+              other ->
+                other
+            end)
           end)
-        end)
 
-      true -> socket
-    end
+        true ->
+          socket
+      end
+
     {:noreply, socket}
   end
 
@@ -602,8 +651,9 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
-    {:noreply, assign(socket,
-      online_users: OnlineUsers.update(socket.assigns.online_users, diff)
-    )}
+    {:noreply,
+     assign(socket,
+       online_users: OnlineUsers.update(socket.assigns.online_users, diff)
+     )}
   end
 end

@@ -13,29 +13,31 @@ defmodule Cc.Chat do
   end
 
   def list_rooms(%User{} = user) do
-    Repo.all(from r in Room,
-      left_join: m in RoomMembership,
-      on: r.id == m.room_id and m.user_id == ^user.id,
-      select: {r, not is_nil(m.id)},
-      order_by: [asc: :name]
+    Repo.all(
+      from r in Room,
+        left_join: m in RoomMembership,
+        on: r.id == m.room_id and m.user_id == ^user.id,
+        select: {r, not is_nil(m.id)},
+        order_by: [asc: :name]
     )
   end
 
   def list_joined_rooms_with_unread_counts(%User{} = user) do
     # From all rooms:
-    Repo.all(from room in Room,
-      # Select only those rooms for which the user has a membership:
-      join: membership in assoc(room, :memberships),
-      where: membership.user_id == ^user.id,
-      # Additionally select the unread messages in those rooms. Use 'left_join'
-      # so that we don't remove rooms which have no unread messages.
-      left_join: message in assoc(room, :messages),
-      on: message.id > membership.last_read_message_id,
-      # Select the room, plus each room's unread message count:
-      group_by: room.id,
-      select: {room, count(message.id)},
-      # Order the results by room name:
-      order_by: [asc: room.name]
+    Repo.all(
+      from room in Room,
+        # Select only those rooms for which the user has a membership:
+        join: membership in assoc(room, :memberships),
+        where: membership.user_id == ^user.id,
+        # Additionally select the unread messages in those rooms. Use 'left_join'
+        # so that we don't remove rooms which have no unread messages.
+        left_join: message in assoc(room, :messages),
+        on: message.id > membership.last_read_message_id,
+        # Select the room, plus each room's unread message count:
+        group_by: room.id,
+        select: {room, count(message.id)},
+        # Order the results by room name:
+        order_by: [asc: room.name]
     )
   end
 
@@ -73,7 +75,8 @@ defmodule Cc.Chat do
   end
 
   def create_message(room, attrs, user) do
-    result = %Message{room: room, user: user}
+    result =
+      %Message{room: room, user: user}
       |> Message.changeset(attrs)
       |> Repo.insert()
 
@@ -89,7 +92,12 @@ defmodule Cc.Chat do
     result = Repo.delete(message)
 
     with {:ok, message} <- result do
-      Phoenix.PubSub.broadcast!(@pubsub, room_pubsub_topic(message.room_id), {:message_deleted, message})
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        room_pubsub_topic(message.room_id),
+        {:message_deleted, message}
+      )
+
       {:ok, message}
     end
   end
@@ -105,6 +113,7 @@ defmodule Cc.Chat do
   def room_pubsub_topic(%Room{id: room_id}) do
     room_pubsub_topic(room_id)
   end
+
   def room_pubsub_topic(room_id) do
     "chat_room:#{room_id}"
   end
@@ -124,7 +133,7 @@ defmodule Cc.Chat do
   def joined_room?(%Room{} = room, %User{} = user) do
     Repo.exists?(
       from rm in RoomMembership,
-      where: rm.room_id == ^room.id and rm.user_id == ^user.id
+        where: rm.room_id == ^room.id and rm.user_id == ^user.id
     )
   end
 
@@ -137,6 +146,7 @@ defmodule Cc.Chat do
       %RoomMembership{} = membership ->
         Repo.delete(membership)
         {room, false}
+
       nil ->
         join_room!(room, user)
         {room, true}
@@ -156,9 +166,11 @@ defmodule Cc.Chat do
         last_read_message_id =
           from(m in Message, where: m.room_id == ^room.id, select: max(m.id))
           |> Repo.one()
+
         membership
         |> change(%{last_read_message_id: last_read_message_id})
         |> Repo.update()
+
       nil ->
         nil
     end
