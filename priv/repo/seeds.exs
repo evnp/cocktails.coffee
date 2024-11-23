@@ -20,6 +20,7 @@ names = [
   "Boromir",
   "Elrond",
   "Frodo",
+  "Gandalf",
   "Gimli",
   "Legolas"
 ]
@@ -35,7 +36,9 @@ elrond = Accounts.get_user_by_email("elrond@fellowship.me")
 aragorn = Accounts.get_user_by_email("aragorn@fellowship.me")
 boromir = Accounts.get_user_by_email("boromir@fellowship.me")
 
-room = Repo.insert!(%Room{name: "council-of-elrond", topic: "What to do with this ring?"})
+shire = Repo.insert!(%Room{name: "the-shire", topic: "Bilbo's eleventy-first birthday party"})
+
+council = Repo.insert!(%Room{name: "council-of-elrond", topic: "What to do with this ring?"})
 
 for {user, message} <- [
       {elrond,
@@ -48,5 +51,5 @@ for {user, message} <- [
        "You cannot wield it! None of us can. The One Ring answers to Sauron alone. It has no other master."},
       {boromir, "And what would a ranger know of this matter?"}
     ] do
-  Repo.insert!(%Message{user: user, room: room, body: message})
+  Repo.insert!(%Message{user: user, room: council, body: message})
 end
