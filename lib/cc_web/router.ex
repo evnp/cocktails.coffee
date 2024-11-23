@@ -70,6 +70,7 @@ defmodule CcWeb.Router do
       live "/home", ChatRoomLive.Index
       live "/realms", ChatRoomLive.Index
       live "/realms/:id", ChatRoomLive
+      live "/realms/:id/new", ChatRoomLive, :new
       live "/realms/:id/edit", ChatRoomLive.Edit
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email

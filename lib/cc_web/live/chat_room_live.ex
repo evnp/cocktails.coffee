@@ -61,7 +61,7 @@ defmodule CcWeb.ChatRoomLive do
                 end
 
                 div class: "hover:bg-sky-600" do
-                  div "phx-click": show_modal("new-room-modal"),
+                  div "phx-click": JS.navigate(~p"/realms/#{@room}/new"),
                       class: [
                         "cursor-pointer whitespace-nowrap text-gray-800",
                         "hover:text-white px-6 py-1 block"
@@ -273,7 +273,10 @@ defmodule CcWeb.ChatRoomLive do
         end
       end
 
-      c &modal/1, id: "new-room-modal" do
+      c &modal/1,
+        id: "new-room-modal",
+        show: @live_action == :new,
+        on_cancel: JS.navigate(~p"/realms/#{@room}") do
         c &header/1 do
           "New realm"
         end
