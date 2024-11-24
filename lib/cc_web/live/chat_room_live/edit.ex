@@ -3,6 +3,8 @@ defmodule CcWeb.ChatRoomLive.Edit do
 
   alias Cc.Chat
 
+  import CcWeb.RoomComponents
+
   def render(assigns) do
     temple do
       div class: "mx-auto w-96 mt-12" do
@@ -18,27 +20,7 @@ defmodule CcWeb.ChatRoomLive.Edit do
           @page_title
         end
 
-        c &simple_form/1,
-          id: "room-form",
-          for: @form,
-          "phx-change": "validate-room",
-          "phx-submit": "save-room" do
-          slot :actions do
-            c &button/1, "phx-disable-with": "Saving...", class: "w-full", do: "Save"
-          end
-
-          c &input/1,
-            field: @form[:name],
-            type: "text",
-            label: "Name",
-            "phx-debounce": true
-
-          c &input/1,
-            field: @form[:topic],
-            type: "text",
-            label: "Topic",
-            "phx-debounce": true
-        end
+        c &room_form/1, form: @new_room_form
       end
     end
   end

@@ -7,6 +7,8 @@ defmodule CcWeb.ChatRoomLive do
   alias Cc.Chat.{Room, Message}
   alias CcWeb.OnlineUsers
 
+  import CcWeb.RoomComponents
+
   def render(assigns) do
     temple do
       div class: "flex flex-col flex-shrink-0 w-64 bg-slate-100" do
@@ -281,27 +283,7 @@ defmodule CcWeb.ChatRoomLive do
           "New realm"
         end
 
-        c &simple_form/1,
-          id: "room-form",
-          for: @new_room_form,
-          "phx-change": "validate-room",
-          "phx-submit": "save-room" do
-          slot :actions do
-            c &button/1, "phx-disable-with": "Saving...", class: "w-full", do: "Save"
-          end
-
-          c &input/1,
-            field: @new_room_form[:name],
-            type: "text",
-            label: "Name",
-            "phx-debounce": true
-
-          c &input/1,
-            field: @new_room_form[:topic],
-            type: "text",
-            label: "Topic",
-            "phx-debounce": true
-        end
+        c &room_form/1, form: @new_room_form
       end
     end
   end
