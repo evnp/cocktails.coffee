@@ -56,6 +56,9 @@ defmodule CcWeb do
       use Phoenix.LiveView,
         layout: {CcWeb.Layouts, :app}
 
+      # Import LiveView-specific utility functions:
+      import CcWeb.Util
+
       unquote(html_helpers())
     end
   end

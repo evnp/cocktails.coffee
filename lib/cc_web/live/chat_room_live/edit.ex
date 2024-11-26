@@ -20,7 +20,7 @@ defmodule CcWeb.ChatRoomLive.Edit do
           @page_title
         end
 
-        c &room_form/1, form: @new_room_form
+        c &room_form/1, form: @edit_room_form
       end
     end
   end
@@ -29,42 +29,45 @@ defmodule CcWeb.ChatRoomLive.Edit do
     room = Chat.get_room!(id)
 
     if Chat.joined_room?(room, socket.assigns.current_user) do
-      {:ok,
-       socket
-       |> assign(page_title: "Edit chat room", room: room)
-       |> assign_room_form(Chat.get_room_changeset(room))}
+      socket
+      |> assign(page_title: "Edit chat room", room: room)
+      |> assign_room_form(Chat.get_room_changeset(room))
+      |> ok()
     else
-      {:ok,
-       socket
-       |> put_flash(:error, "You shall not pass.")
-       |> push_navigate(to: ~p"/")}
+      socket
+      |> put_flash(:error, "You shall not pass.")
+      |> push_navigate(to: ~p"/")
+      |> ok()
     end
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do
-    {:noreply,
-     socket
-     |> assign_room_form(
-       socket.assigns.room
-       |> Chat.get_room_changeset(room_params)
-       |> Map.put(:action, :validate)
-     )}
+    socket
+    |> assign_room_form(
+      socket.assigns.room
+      |> Chat.get_room_changeset(room_params)
+      |> Map.put(:action, :validate)
+    )
+    |> noreply()
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
     case Chat.update_room(socket.assigns.room, room_params) do
       {:ok, room} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Room updated successfully")
-         |> push_navigate(to: ~p"/realms/#{room}")}
+        socket
+        |> put_flash(:info, "Room updated successfully")
+        |> push_navigate(to: ~p"/realms/#{room}")
+        |> noreply()
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_room_form(socket, changeset)}
+        socket
+        |> assign_room_form(changeset)
+        |> noreply()
     end
   end
 
   defp assign_room_form(socket, %Ecto.Changeset{} = changeset) do
-    assign(socket, :form, to_form(changeset))
+    socket
+    |> assign(edit_room_form: to_form(changeset))
   end
 end

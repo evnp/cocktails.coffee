@@ -448,7 +448,8 @@ defmodule CcWeb.ChatRoomLive do
   end
 
   defp assign_room_form(socket, changeset) do
-    assign(socket, :new_room_form, to_form(changeset))
+    socket
+    |> assign(new_room_form: to_form(changeset))
   end
 
   def mount(_params, _session, socket) do
@@ -469,21 +470,21 @@ defmodule CcWeb.ChatRoomLive do
     OnlineUsers.subscribe()
     Enum.each(rooms, fn {room, _} -> Chat.room_pubsub_subscribe(room) end)
 
-    {:ok,
-     socket
-     |> assign(
-       users: Accounts.list_users(),
-       rooms: rooms,
-       online_users: OnlineUsers.list(),
-       timezone: timezone
-     )
-     |> assign_room_form(Chat.get_room_changeset(%Room{}))
-     |> stream_configure(:messages,
-       dom_id: fn
-         %Message{id: id} -> "messages-#{id}"
-         :unread_marker -> "messages-unread-marker"
-       end
-     )}
+    socket
+    |> assign(
+      users: Accounts.list_users(),
+      rooms: rooms,
+      online_users: OnlineUsers.list(),
+      timezone: timezone
+    )
+    |> assign_room_form(Chat.get_room_changeset(%Room{}))
+    |> stream_configure(:messages,
+      dom_id: fn
+        %Message{id: id} -> "messages-#{id}"
+        :unread_marker -> "messages-unread-marker"
+      end
+    )
+    |> ok()
   end
 
   def handle_params(params, _session, socket) do
@@ -502,65 +503,63 @@ defmodule CcWeb.ChatRoomLive do
 
     Chat.update_last_read_message_id(room, socket.assigns.current_user)
 
-    {:noreply,
-     socket
-     |> stream(:messages, messages, reset: true)
-     |> assign(
-       room: room,
-       joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
-       hide_topic?: false,
-       page_title: "Cocktails.Coffee. #" <> room.name,
-       new_message_form: to_form(Chat.get_message_changeset(%Message{}))
-     )
-     |> push_event("scroll_messages_to_bottom", %{})
-     |> update(:rooms, fn rooms ->
-       room_id = room.id
+    socket
+    |> stream(:messages, messages, reset: true)
+    |> assign(
+      room: room,
+      joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
+      hide_topic?: false,
+      page_title: "Cocktails.Coffee. #" <> room.name,
+      new_message_form: to_form(Chat.get_message_changeset(%Message{}))
+    )
+    |> push_event("scroll_messages_to_bottom", %{})
+    |> update(:rooms, fn rooms ->
+      room_id = room.id
 
-       Enum.map(rooms, fn
-         {%Room{id: ^room_id} = current_room, _} -> {current_room, 0}
-         other_room -> other_room
-       end)
-     end)}
+      Enum.map(rooms, fn
+        {%Room{id: ^room_id} = current_room, _} -> {current_room, 0}
+        other_room -> other_room
+      end)
+    end)
+    |> noreply()
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply,
-     assign(socket,
-       hide_topic?: !socket.assigns.hide_topic?
-     )}
+    socket
+    |> assign(hide_topic?: !socket.assigns.hide_topic?)
+    |> noreply()
   end
 
   def handle_event("validate-message", %{"message" => data}, socket) do
-    {:noreply,
-     assign(socket,
-       new_message_form: to_form(Chat.get_message_changeset(%Message{}, data))
-     )}
+    socket
+    |> assign(new_message_form: to_form(Chat.get_message_changeset(%Message{}, data)))
+    |> noreply()
   end
 
   def handle_event("submit-message", %{"message" => data}, socket) do
     %{current_user: current_user, room: room} = socket.assigns
 
-    {:noreply,
-     if !Chat.joined_room?(room, current_user) do
-       socket
-     else
-       case Chat.create_message(room, data, current_user) do
-         {:ok, _message} ->
-           assign(socket,
-             new_message_form: to_form(Chat.get_message_changeset(%Message{}))
-           )
+    if !Chat.joined_room?(room, current_user) do
+      socket
+    else
+      case Chat.create_message(room, data, current_user) do
+        {:ok, _message} ->
+          socket
+          |> assign(new_message_form: to_form(Chat.get_message_changeset(%Message{})))
 
-         {:error, changeset} ->
-           assign(socket,
-             new_message_form: to_form(changeset)
-           )
-       end
-     end}
+        {:error, changeset} ->
+          socket
+          |> assign(new_message_form: to_form(changeset))
+      end
+    end
+    |> noreply()
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
     Chat.delete_message(id, socket.assigns.current_user)
-    {:noreply, socket}
+
+    socket
+    |> noreply()
   end
 
   def handle_event("join-room", _, socket) do
@@ -568,21 +567,22 @@ defmodule CcWeb.ChatRoomLive do
     Chat.join_room!(socket.assigns.room, current_user)
     Chat.room_pubsub_subscribe(socket.assigns.room)
 
-    {:noreply,
-     assign(socket,
-       joined_room?: true,
-       rooms: Chat.list_joined_rooms_with_unread_counts(current_user)
-     )}
+    socket
+    |> assign(
+      joined_room?: true,
+      rooms: Chat.list_joined_rooms_with_unread_counts(current_user)
+    )
+    |> noreply()
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do
-    {:noreply,
-     socket
-     |> assign_room_form(
-       socket.assigns.room
-       |> Chat.get_room_changeset(room_params)
-       |> Map.put(:action, :validate)
-     )}
+    socket
+    |> assign_room_form(
+      socket.assigns.room
+      |> Chat.get_room_changeset(room_params)
+      |> Map.put(:action, :validate)
+    )
+    |> noreply()
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
@@ -590,55 +590,56 @@ defmodule CcWeb.ChatRoomLive do
       {:ok, room} ->
         Chat.join_room!(room, socket.assigns.current_user)
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Created realm")
-         |> push_navigate(to: ~p"/realms/#{room}")}
+        socket
+        |> put_flash(:info, "Created realm")
+        |> push_navigate(to: ~p"/realms/#{room}")
+        |> noreply()
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, socket |> assign_room_form(changeset)}
+        socket
+        |> assign_room_form(changeset)
+        |> noreply()
     end
   end
 
   def handle_info({:new_message, message}, socket) do
     room = socket.assigns.room
 
-    socket =
-      cond do
-        message.room_id == room.id ->
-          Chat.update_last_read_message_id(room, socket.assigns.current_user)
+    cond do
+      message.room_id == room.id ->
+        Chat.update_last_read_message_id(room, socket.assigns.current_user)
 
-          socket
-          |> stream_insert(:messages, message)
-          |> push_event("scroll_messages_to_bottom", %{})
+        socket
+        |> stream_insert(:messages, message)
+        |> push_event("scroll_messages_to_bottom", %{})
 
-        message.user_id != socket.assigns.current_user.id ->
-          socket
-          |> update(:rooms, fn rooms ->
-            Enum.map(rooms, fn
-              {%Room{id: id} = room, count} when id == message.room_id ->
-                {room, count + 1}
+      message.user_id != socket.assigns.current_user.id ->
+        socket
+        |> update(:rooms, fn rooms ->
+          Enum.map(rooms, fn
+            {%Room{id: id} = room, count} when id == message.room_id ->
+              {room, count + 1}
 
-              other ->
-                other
-            end)
+            other ->
+              other
           end)
+        end)
 
-        true ->
-          socket
-      end
-
-    {:noreply, socket}
+      true ->
+        socket
+    end
+    |> noreply()
   end
 
   def handle_info({:message_deleted, message}, socket) do
-    {:noreply, stream_delete(socket, :messages, message)}
+    socket
+    |> stream_delete(:messages, message)
+    |> noreply()
   end
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
-    {:noreply,
-     assign(socket,
-       online_users: OnlineUsers.update(socket.assigns.online_users, diff)
-     )}
+    socket
+    |> assign(online_users: OnlineUsers.update(socket.assigns.online_users, diff))
+    |> noreply()
   end
 end
