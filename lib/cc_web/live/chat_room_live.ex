@@ -127,7 +127,7 @@ defmodule CcWeb.ChatRoomLive do
              ] do
             if @current_user do
               li class: "text-[0.8125rem] leading-6 text-zinc-900" do
-                username(@current_user)
+                @current_user.username
               end
 
               li do
@@ -371,7 +371,7 @@ defmodule CcWeb.ChatRoomLive do
         div class: "ml-2" do
           div class: "-mt-1" do
             c &link/1, class: "text-sm font-semibold hover:underline" do
-              span do: username(@message.user)
+              span do: @message.user.username
             end
 
             if @timezone do
@@ -419,14 +419,10 @@ defmodule CcWeb.ChatRoomLive do
         end
 
         span class: "ml-2 leading-none" do
-          username(@user)
+          @user.username
         end
       end
     end
-  end
-
-  defp username(user) do
-    user.email |> String.split("@") |> List.first() |> String.capitalize()
   end
 
   defp message_timestamp(message, timezone) do

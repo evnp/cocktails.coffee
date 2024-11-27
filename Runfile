@@ -22,6 +22,9 @@ repl: # start interactive shell
 test: # run tests
   mix test
 
+format: # format
+  mix format
+
 seed: # insert test data into database
   mix run priv/repo/seeds.exs
 
