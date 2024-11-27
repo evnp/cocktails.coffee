@@ -29,7 +29,7 @@ defmodule CcWeb.UserSessionController do
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
       conn
       |> put_flash(:error, "Invalid email or password")
-      |> put_flash(:email, String.slice(email, 0, 160))
+      |> put_flash(:email, String.slice(email, 0, 254))
       |> redirect(to: ~p"/users/login")
     end
   end

@@ -5,7 +5,7 @@ defmodule CcWeb.UserForgotPasswordLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
+    <div class="mx-auto w-96 mt-16">
       <.header class="text-center">
         Forgot your password?
         <:subtitle>We'll send a password reset link to your inbox</:subtitle>
@@ -15,7 +15,7 @@ defmodule CcWeb.UserForgotPasswordLive do
         <.input field={@form[:email]} type="email" placeholder="Email" required />
         <:actions>
           <.button phx-disable-with="Sending..." class="w-full">
-            Send password reset instructions
+            Send password reset instructions <span aria-hidden="true">→</span>
           </.button>
         </:actions>
       </.simple_form>
@@ -45,6 +45,6 @@ defmodule CcWeb.UserForgotPasswordLive do
     {:noreply,
      socket
      |> put_flash(:info, info)
-     |> redirect(to: ~p"/")}
+     |> redirect(to: ~p"/users/login")}
   end
 end

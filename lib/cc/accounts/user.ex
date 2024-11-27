@@ -37,20 +37,39 @@ defmodule Cc.Accounts.User do
       using this changeset for validations on a LiveView form before
       submitting the form), this option can be set to `false`.
       Defaults to `true`.
+
+    * `:validate_username` - Validates the uniqueness of the username, in case
+      you don't want to validate the uniqueness of the username (like when
+      using this changeset for validations on a LiveView form before
+      submitting the form), this option can be set to `false`.
+      Defaults to `true`.
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :username, :password])
     |> validate_email(opts)
+    |> validate_username(opts)
     |> validate_password(opts)
   end
 
   defp validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, max: 160)
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+\.[^\s]+$/,
+      message: "must have @, no spaces, and valid domain"
+    )
+    |> validate_length(:email, max: 254)
     |> maybe_validate_unique_email(opts)
+  end
+
+  defp validate_username(changeset, opts) do
+    changeset
+    |> validate_required([:username])
+    |> validate_format(:username, ~r/^[A-Za-z0-9_-]+$/,
+      message: "can only contain letters, numbers, hyphens, and underscores"
+    )
+    |> validate_length(:username, max: 254)
+    |> maybe_validate_unique_username(opts)
   end
 
   defp validate_password(changeset, opts) do
@@ -86,6 +105,16 @@ defmodule Cc.Accounts.User do
       changeset
       |> unsafe_validate_unique(:email, Cc.Repo)
       |> unique_constraint(:email)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_unique_username(changeset, opts) do
+    if Keyword.get(opts, :validate_username, true) do
+      changeset
+      |> unsafe_validate_unique(:username, Cc.Repo)
+      |> unique_constraint(:username)
     else
       changeset
     end
