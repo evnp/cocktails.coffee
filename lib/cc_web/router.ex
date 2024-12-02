@@ -16,6 +16,12 @@ defmodule CcWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/", CcWeb do
+    pipe_through :browser
+
+    get "/home", PageController, :home
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", CcWeb do
   #   pipe_through :api
@@ -36,13 +42,6 @@ defmodule CcWeb.Router do
       live_dashboard "/dashboard", metrics: CcWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
-  end
-
-  scope "/", CcWeb do
-    pipe_through :browser
-
-    # get "/", PageController, :home
-    # get "/home", PageController, :home
   end
 
   ## Authenticated routes
@@ -67,7 +66,6 @@ defmodule CcWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{CcWeb.UserAuth, :ensure_authenticated}] do
       live "/", ChatRoomLive.Index
-      live "/home", ChatRoomLive.Index
       live "/realms", ChatRoomLive.Index
       live "/realms/:id", ChatRoomLive
       live "/realms/:id/new", ChatRoomLive, :new

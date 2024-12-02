@@ -73,7 +73,7 @@ defmodule CcWeb.ChatRoomLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(page_title: "Realms")
+     |> assign(page_title: "Shadow Realm")
      |> stream_configure(:rooms, dom_id: fn {room, _} -> "rooms-#{room.id}" end)
      |> stream(:rooms, Chat.list_rooms(socket.assigns.current_user))}
   end

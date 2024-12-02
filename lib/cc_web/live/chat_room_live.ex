@@ -57,7 +57,7 @@ defmodule CcWeb.ChatRoomLive do
                           "cursor-pointer whitespace-nowrap text-gray-800",
                           "hover:text-white px-6 py-1"
                         ] do
-                      "World map"
+                      "Shadow Realm"
                     end
                   end
                 end
@@ -68,7 +68,7 @@ defmodule CcWeb.ChatRoomLive do
                         "cursor-pointer whitespace-nowrap text-gray-800",
                         "hover:text-white px-6 py-1 block"
                       ] do
-                    "Create a new realm"
+                    "New Realm"
                   end
                 end
               end
@@ -505,7 +505,7 @@ defmodule CcWeb.ChatRoomLive do
       room: room,
       joined_room?: Chat.joined_room?(room, socket.assigns.current_user),
       hide_topic?: false,
-      page_title: "Cocktails.Coffee. #" <> room.name,
+      page_title: "##{room.name}",
       new_message_form: to_form(Chat.get_message_changeset(%Message{}))
     )
     |> push_event("scroll_messages_to_bottom", %{})
