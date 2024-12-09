@@ -182,21 +182,33 @@ defmodule CcWeb.ChatRoomLive do
             class: "flex flex-col flex-grow overflow-auto",
             "phx-update": "stream",
             "phx-hook": "RoomMessages" do
-          for {dom_id, message} <- @streams.messages do
-            if message == :unread_marker do
-              div id: dom_id,
-                  class: [
-                    "w-full flex text-red-500 items-center gap-3 pr-5"
+          for {dom_id, message_or_divider} <- @streams.messages do
+            case message_or_divider do
+              %Message{} ->
+                c &message/1,
+                  message: message_or_divider,
+                  current_user: @current_user,
+                  dom_id: dom_id,
+                  timezone: @timezone
+
+              %Date{} ->
+                div id: dom_id, class: "flex flex-col items-center mt-6" do
+                  hr class: "w-full"
+                  span class: [
+                    "-mt-3 bg-white h-6 px-3 rounded-full border",
+                    "text-xs font-semibold mx-auto",
+                    "flex items-center justify-center",
                   ] do
-                div class: "w-full h-px grow bg-red-500"
-                div class: "text-sm", do: "New"
-              end
-            else
-              c &message/1,
-                message: message,
-                current_user: @current_user,
-                dom_id: dom_id,
-                timezone: @timezone
+                    format_date(message_or_divider)
+                  end
+                end
+
+              :unread_marker ->
+                div id: dom_id,
+                    class: "w-full flex text-red-500 items-center gap-3 pr-5" do
+                  div class: "w-full h-px grow bg-red-500"
+                  div class: "text-sm", do: "New"
+                end
             end
           end
         end
@@ -285,6 +297,31 @@ defmodule CcWeb.ChatRoomLive do
 
         c &room_form/1, form: @new_room_form
       end
+    end
+  end
+
+  defp format_date(%Date{} = date) do
+    today = Date.utc_today()
+
+    case Date.diff(today, date) do
+      0 ->
+        "Today"
+
+      1 ->
+        "Yesterday"
+
+      _ ->
+        format_str = "%A, %B %e#{ordinal(date.day)}#{if today.year != date.year, do: " %Y"}"
+        Timex.format!(date, format_str, :strftime)
+    end
+  end
+
+  defp ordinal(day) do
+    cond do
+      rem(day, 10) == 1 and day != 11 -> "st"
+      rem(day, 10) == 2 and day != 12 -> "nd"
+      rem(day, 10) == 3 and day != 13 -> "rd"
+      true -> "th"
     end
   end
 
@@ -431,10 +468,27 @@ defmodule CcWeb.ChatRoomLive do
     |> Timex.format!("%-l:%M %p", :strftime)
   end
 
+  defp insert_date_dividers(messages, nil), do: messages
+
+  defp insert_date_dividers(messages, timezone) do
+    messages
+    |> Enum.group_by(fn message ->
+      message.inserted_at
+      |> DateTime.shift_zone!(timezone)
+      |> DateTime.to_date()
+    end)
+    |> Enum.sort_by(fn {date, _msgs} -> date end, &(Date.compare(&1, &2) != :gt))
+    |> Enum.flat_map(fn {date, messages} -> [date | messages] end)
+  end
+
   defp maybe_insert_unread_marker(messages, nil), do: messages
 
   defp maybe_insert_unread_marker(messages, last_read_message_id) do
-    {read, unread} = Enum.split_while(messages, &(&1.id <= last_read_message_id))
+    {read, unread} =
+      Enum.split_while(messages, fn
+        %Message{} = message -> message.id <= last_read_message_id
+        _ -> true
+      end)
 
     if unread == [] do
       read
@@ -477,6 +531,7 @@ defmodule CcWeb.ChatRoomLive do
     |> stream_configure(:messages,
       dom_id: fn
         %Message{id: id} -> "messages-#{id}"
+        %Date{} = date -> to_string(date)
         :unread_marker -> "messages-unread-marker"
       end
     )
@@ -493,6 +548,7 @@ defmodule CcWeb.ChatRoomLive do
     messages =
       room
       |> Chat.list_messages_in_room()
+      |> insert_date_dividers(socket.assigns.timezone)
       |> maybe_insert_unread_marker(
         Chat.get_last_read_message_id(room, socket.assigns.current_user)
       )

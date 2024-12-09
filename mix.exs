@@ -57,11 +57,12 @@ defmodule Cc.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:temple, "~> 0.14.0"},
-      {:timex, "~> 3.7.11"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:timex, "~> 3.7.11"},
+      {:faker, "~> 0.18", only: :dev},
     ]
   end
 
