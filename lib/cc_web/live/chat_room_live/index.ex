@@ -2,13 +2,22 @@ defmodule CcWeb.ChatRoomLive.Index do
   use CcWeb, :live_view
 
   alias Cc.Chat
+  alias Cc.Chat.Room
+
+  import CcWeb.RoomComponents
 
   def render(assigns) do
     temple do
       main class: "flex-1 p-6 max-w-4xl mx-auto" do
-        div class: "mb-4" do
-          h1 class: "text-xl font-semibold" do
-            @page_title
+        div class: "flex justify-between mb-4 items-center" do
+          h1 class: "text-xl font-semibold", do: @page_title
+
+          button "phx-click": JS.navigate(~p"/realms/new"),
+                 class: [
+                   "bg-white font-semibold py-2 px-4 border border-slate-400",
+                   "rounded shadow-sm"
+                 ] do
+            "Create realm"
           end
         end
 
@@ -67,13 +76,23 @@ defmodule CcWeb.ChatRoomLive.Index do
           end
         end
       end
+
+      c &live_component/1,
+        id: "new-room-modal-component",
+        module: CcWeb.ChatRoomLive.Components.NewRoomModal,
+        current_user: @current_user,
+        show: @live_action == :new,
+        on_cancel: JS.navigate(~p"/realms")
     end
   end
 
   def mount(_params, _session, socket) do
+    changeset = Chat.get_room_changeset(%Room{})
+
     {:ok,
      socket
      |> assign(page_title: "Shadow Realm")
+     |> assign_form(changeset)
      |> stream_configure(:rooms, dom_id: fn {room, _} -> "rooms-#{room.id}" end)
      |> stream(:rooms, Chat.list_rooms(socket.assigns.current_user))}
   end
@@ -85,5 +104,9 @@ defmodule CcWeb.ChatRoomLive.Index do
       |> Chat.toggle_room_membership(socket.assigns.current_user)
 
     {:noreply, stream_insert(socket, :rooms, {room, joined?})}
+  end
+
+  defp assign_form(socket, changeset) do
+    assign(socket, :form, to_form(changeset))
   end
 end

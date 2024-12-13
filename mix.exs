@@ -6,6 +6,7 @@ defmodule Cc.MixProject do
       app: :cc,
       version: "0.1.0",
       elixir: "~> 1.14",
+      compilers: [:temple] ++ Mix.compilers(),
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -62,7 +63,7 @@ defmodule Cc.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:timex, "~> 3.7.11"},
-      {:faker, "~> 0.18", only: :dev},
+      {:faker, "~> 0.18", only: :dev}
     ]
   end
 

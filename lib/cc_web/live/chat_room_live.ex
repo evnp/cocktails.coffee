@@ -7,8 +7,6 @@ defmodule CcWeb.ChatRoomLive do
   alias Cc.Chat.{Room, Message}
   alias CcWeb.OnlineUsers
 
-  import CcWeb.RoomComponents
-
   def render(assigns) do
     temple do
       div class: "flex flex-col flex-shrink-0 w-64 bg-slate-100" do
@@ -194,11 +192,12 @@ defmodule CcWeb.ChatRoomLive do
               %Date{} ->
                 div id: dom_id, class: "flex flex-col items-center mt-6" do
                   hr class: "w-full"
+
                   span class: [
-                    "-mt-3 bg-white h-6 px-3 rounded-full border",
-                    "text-xs font-semibold mx-auto",
-                    "flex items-center justify-center",
-                  ] do
+                         "-mt-3 bg-white h-6 px-3 rounded-full border",
+                         "text-xs font-semibold mx-auto",
+                         "flex items-center justify-center"
+                       ] do
                     format_date(message_or_divider)
                   end
                 end
@@ -287,16 +286,12 @@ defmodule CcWeb.ChatRoomLive do
         end
       end
 
-      c &modal/1,
-        id: "new-room-modal",
+      c &live_component/1,
+        id: "new-room-modal-component",
+        module: CcWeb.ChatRoomLive.Components.NewRoomModal,
+        current_user: @current_user,
         show: @live_action == :new,
-        on_cancel: JS.navigate(~p"/realms/#{@room}") do
-        c &header/1 do
-          "New realm"
-        end
-
-        c &room_form/1, form: @new_room_form
-      end
+        on_cancel: JS.navigate(~p"/realms/#{@room}")
     end
   end
 

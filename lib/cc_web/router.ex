@@ -67,6 +67,7 @@ defmodule CcWeb.Router do
       on_mount: [{CcWeb.UserAuth, :ensure_authenticated}] do
       live "/", ChatRoomLive.Index
       live "/realms", ChatRoomLive.Index
+      live "/realms/new", ChatRoomLive.Index, :new
       live "/realms/:id", ChatRoomLive
       live "/realms/:id/new", ChatRoomLive, :new
       live "/realms/:id/edit", ChatRoomLive.Edit

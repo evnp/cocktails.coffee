@@ -4,6 +4,7 @@ defmodule CcWeb.RoomComponents do
   import CcWeb.CoreComponents
 
   attr :form, Phoenix.HTML.Form, required: true
+  attr :target, :any, default: nil
 
   def room_form(assigns) do
     temple do
@@ -11,7 +12,8 @@ defmodule CcWeb.RoomComponents do
         id: "room-form",
         for: @form,
         "phx-change": "validate-room",
-        "phx-submit": "save-room" do
+        "phx-submit": "save-room",
+        "phx-target": @target do
         slot :actions do
           c &button/1, "phx-disable-with": "Saving...", class: "w-full", do: "Save"
         end

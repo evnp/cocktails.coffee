@@ -75,6 +75,9 @@ defmodule CcWeb do
     quote do
       use Phoenix.LiveComponent
 
+      # Import LiveView-specific utility functions:
+      import CcWeb.Util
+
       unquote(html_helpers())
     end
   end
