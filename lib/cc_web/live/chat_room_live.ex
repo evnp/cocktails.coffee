@@ -123,54 +123,38 @@ defmodule CcWeb.ChatRoomLive do
           ul class: [
                "relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end"
              ] do
-            if @current_user do
-              li class: "text-[0.8125rem] leading-6 text-zinc-900" do
-                @current_user.username
+            li class: "text-[0.8125rem] leading-6 text-zinc-900" do
+              div class: "text-sm leading-10" do
+                c &link/1,
+                  class: "flex gap-4 items-center",
+                  "phx-click": "show-profile",
+                  "phx-value-user-id": @current_user.id do
+                  img src: ~p"/images/one_ring.jpg", class: "h-8 w-8 rounded"
+                  span class: "hover:underline", do: @current_user.username
+                end
               end
+            end
 
-              li do
-                c &link/1,
-                  href: ~p"/users/settings",
-                  class: [
-                    "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700"
-                  ] do
-                  "Settings"
-                end
+            li do
+              c &link/1,
+                href: ~p"/users/settings",
+                class: [
+                  "text-[0.8125rem] leading-6 text-zinc-900",
+                  "font-semibold hover:text-zinc-700"
+                ] do
+                "Settings"
               end
+            end
 
-              li do
-                c &link/1,
-                  href: ~p"/users/logout",
-                  method: "delete",
-                  class: [
-                    "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700"
-                  ] do
-                  "Log out"
-                end
-              end
-            else
-              li do
-                c &link/1,
-                  href: ~p"/users/register",
-                  class: [
-                    "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700"
-                  ] do
-                  "Register"
-                end
-              end
-
-              li do
-                c &link/1,
-                  href: ~p"/users/login",
-                  class: [
-                    "text-[0.8125rem] leading-6 text-zinc-900",
-                    "font-semibold hover:text-zinc-700"
-                  ] do
-                  "Log in"
-                end
+            li do
+              c &link/1,
+                href: ~p"/users/logout",
+                method: "delete",
+                class: [
+                  "text-[0.8125rem] leading-6 text-zinc-900",
+                  "font-semibold hover:text-zinc-700"
+                ] do
+                "Log out"
               end
             end
           end
@@ -286,6 +270,13 @@ defmodule CcWeb.ChatRoomLive do
         end
       end
 
+      if assigns[:profile] do
+        c &live_component/1,
+          id: "profile-component",
+          module: CcWeb.ChatRoomLive.Components.Profile,
+          user: @profile
+      end
+
       c &live_component/1,
         id: "new-room-modal-component",
         module: CcWeb.ChatRoomLive.Components.NewRoomModal,
@@ -398,13 +389,17 @@ defmodule CcWeb.ChatRoomLive do
           end
         end
 
-        img class: "h-10 w-10 rounded flex-shrink-0", src: ~p"/images/one_ring.jpg"
+        a class: "flex-shrink-0 cursor-pointer",
+          "phx-click": "show-profile",
+          "phx-value-user-id": @message.user.id,
+          do: img class: "h-10 w-10 rounded", src: ~p"/images/one_ring.jpg"
 
         div class: "ml-2" do
           div class: "-mt-1" do
-            c &link/1, class: "text-sm font-semibold hover:underline" do
-              span do: @message.user.username
-            end
+            a class: "text-sm font-semibold hover:underline cursor-pointer",
+              "phx-click": "show-profile",
+              "phx-value-user-id": @message.user.id,
+              do: @message.user.username
 
             if @timezone do
               span class: "ml-1 text-xs text-gray-500" do
@@ -568,6 +563,18 @@ defmodule CcWeb.ChatRoomLive do
         other_room -> other_room
       end)
     end)
+    |> noreply()
+  end
+
+  def handle_event("show-profile", %{"user-id" => user_id}, socket) do
+    socket
+    |> assign(profile: Accounts.get_user!(user_id))
+    |> noreply()
+  end
+
+  def handle_event("close-profile", _, socket) do
+    socket
+    |> assign(profile: nil)
     |> noreply()
   end
 
