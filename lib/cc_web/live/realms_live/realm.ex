@@ -1,4 +1,4 @@
-defmodule CcWeb.RealmsLive do
+defmodule CcWeb.RealmsLive.Realm do
   use CcWeb, :live_view
 
   alias Cc.Accounts

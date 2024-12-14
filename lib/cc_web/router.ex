@@ -68,8 +68,8 @@ defmodule CcWeb.Router do
       live "/", RealmsLive.WorldMap
       live "/realms", RealmsLive.WorldMap
       live "/realms/new", RealmsLive.WorldMap, :new
-      live "/realms/:id", RealmsLive
-      live "/realms/:id/new", RealmsLive, :new
+      live "/realms/:id", RealmsLive.Realm
+      live "/realms/:id/new", RealmsLive.Realm, :new
       live "/realms/:id/edit", RealmsLive.Edit
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
