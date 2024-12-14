@@ -65,9 +65,9 @@ defmodule CcWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{CcWeb.UserAuth, :ensure_authenticated}] do
-      live "/", RealmsLive.Index
-      live "/realms", RealmsLive.Index
-      live "/realms/new", RealmsLive.Index, :new
+      live "/", RealmsLive.WorldMap
+      live "/realms", RealmsLive.WorldMap
+      live "/realms/new", RealmsLive.WorldMap, :new
       live "/realms/:id", RealmsLive
       live "/realms/:id/new", RealmsLive, :new
       live "/realms/:id/edit", RealmsLive.Edit

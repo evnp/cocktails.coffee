@@ -1,4 +1,4 @@
-defmodule CcWeb.RealmsLive.Index do
+defmodule CcWeb.RealmsLive.WorldMap do
   use CcWeb, :live_view
 
   alias Cc.Chat
