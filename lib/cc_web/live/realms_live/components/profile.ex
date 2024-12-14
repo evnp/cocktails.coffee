@@ -1,4 +1,4 @@
-defmodule CcWeb.ChatRoomLive.Components.Profile do
+defmodule CcWeb.RealmsLive.Components.Profile do
   use CcWeb, :live_component
 
   def render(assigns) do

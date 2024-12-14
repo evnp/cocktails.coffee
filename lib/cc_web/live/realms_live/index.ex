@@ -1,10 +1,8 @@
-defmodule CcWeb.ChatRoomLive.Index do
+defmodule CcWeb.RealmsLive.Index do
   use CcWeb, :live_view
 
   alias Cc.Chat
   alias Cc.Chat.Room
-
-  import CcWeb.RoomComponents
 
   def render(assigns) do
     temple do
@@ -79,7 +77,7 @@ defmodule CcWeb.ChatRoomLive.Index do
 
       c &live_component/1,
         id: "new-room-modal-component",
-        module: CcWeb.ChatRoomLive.Components.NewRoomModal,
+        module: CcWeb.RealmsLive.Components.NewRoomModal,
         current_user: @current_user,
         show: @live_action == :new,
         on_cancel: JS.navigate(~p"/realms")

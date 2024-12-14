@@ -1,4 +1,4 @@
-defmodule CcWeb.ChatRoomLive.Edit do
+defmodule CcWeb.RealmsLive.Edit do
   use CcWeb, :live_view
 
   alias Cc.Chat

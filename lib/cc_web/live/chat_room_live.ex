@@ -1,4 +1,4 @@
-defmodule CcWeb.ChatRoomLive do
+defmodule CcWeb.RealmsLive do
   use CcWeb, :live_view
 
   alias Cc.Accounts
@@ -273,13 +273,13 @@ defmodule CcWeb.ChatRoomLive do
       if assigns[:profile] do
         c &live_component/1,
           id: "profile-component",
-          module: CcWeb.ChatRoomLive.Components.Profile,
+          module: CcWeb.RealmsLive.Components.Profile,
           user: @profile
       end
 
       c &live_component/1,
         id: "new-room-modal-component",
-        module: CcWeb.ChatRoomLive.Components.NewRoomModal,
+        module: CcWeb.RealmsLive.Components.NewRoomModal,
         current_user: @current_user,
         show: @live_action == :new,
         on_cancel: JS.navigate(~p"/realms/#{@room}")

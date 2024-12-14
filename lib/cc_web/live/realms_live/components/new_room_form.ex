@@ -1,4 +1,4 @@
-defmodule CcWeb.ChatRoomLive.Components.NewRoomForm do
+defmodule CcWeb.RealmsLive.Components.NewRoomForm do
   use CcWeb, :live_component
 
   alias Cc.Chat

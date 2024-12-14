@@ -1,4 +1,4 @@
-defmodule CcWeb.ChatRoomLive.Components.NewRoomModal do
+defmodule CcWeb.RealmsLive.Components.NewRoomModal do
   use CcWeb, :live_component
 
   def render(assigns) do
@@ -8,7 +8,7 @@ defmodule CcWeb.ChatRoomLive.Components.NewRoomModal do
         <.header>New chat room</.header>
         <.live_component
           id="new-room-form-component"
-          module={CcWeb.ChatRoomLive.Components.NewRoomForm}
+          module={CcWeb.RealmsLive.Components.NewRoomForm}
           current_user={@current_user}
         />
       </.modal>
