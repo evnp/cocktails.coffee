@@ -11,6 +11,7 @@ defmodule Cc.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    field :avatar_path, :string
     many_to_many :rooms, Room, join_through: RoomMembership
     timestamps(type: :utc_datetime)
   end
@@ -118,6 +119,14 @@ defmodule Cc.Accounts.User do
     else
       changeset
     end
+  end
+
+  @doc """
+  A user changeset for changing the email.
+  """
+  def avatar_changeset(user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [:avatar_path])
   end
 
   @doc """

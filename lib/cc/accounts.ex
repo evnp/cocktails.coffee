@@ -66,7 +66,15 @@ defmodule Cc.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    Repo.get!(User, id)
+  end
+
+  def save_user_avatar_path(user, avatar_path) do
+    user
+    |> User.avatar_changeset(%{avatar_path: avatar_path})
+    |> Repo.update()
+  end
 
   ## User registration
 
