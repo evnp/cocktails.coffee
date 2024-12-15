@@ -1,6 +1,8 @@
 defmodule CcWeb.RealmsLive.Components.Profile do
   use CcWeb, :live_component
 
+  import CcWeb.UserComponents
+
   def render(assigns) do
     temple do
       div class: "flex flex-col flex-shrink-0 w-1/4 max-w-xs bg-white shadow-xl" do
@@ -22,7 +24,7 @@ defmodule CcWeb.RealmsLive.Components.Profile do
 
         div class: "flex flex-col flex-grow overflow-auto p-4" do
           div class: "mb-4" do
-            img src: ~p"/images/one_ring.jpg", class: "w-48 rounded mx-auto"
+            c &user_avatar/1, class: "w-48 rounded mx-auto", user: @user
           end
 
           h2 class: "text-xl font-bold text-gray-800" do

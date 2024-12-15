@@ -7,6 +7,8 @@ defmodule CcWeb.RealmsLive.Realm do
   alias Cc.Chat.{Room, Message}
   alias CcWeb.OnlineUsers
 
+  import CcWeb.UserComponents
+
   def render(assigns) do
     temple do
       div class: "flex flex-col flex-shrink-0 w-64 bg-slate-100" do
@@ -129,9 +131,7 @@ defmodule CcWeb.RealmsLive.Realm do
                   class: "flex gap-4 items-center",
                   "phx-click": "show-profile",
                   "phx-value-user-id": @current_user.id do
-                  img class: "h-8 w-8 rounded",
-                      src: user_avatar_path(@current_user)
-
+                  c &user_avatar/1, class: "h-8 w-8 rounded", user: @current_user
                   span class: "hover:underline", do: @current_user.username
                 end
               end
@@ -313,14 +313,6 @@ defmodule CcWeb.RealmsLive.Realm do
     end
   end
 
-  defp user_avatar_path(user) do
-    if user.avatar_path do
-      ~p"/uploads/#{user.avatar_path}"
-    else
-      ~p"/images/one_ring.jpg"
-    end
-  end
-
   attr :dom_id, :string, required: true
   attr :text, :string, required: true
   attr :on_click, JS, required: true
@@ -401,8 +393,9 @@ defmodule CcWeb.RealmsLive.Realm do
 
         a class: "flex-shrink-0 cursor-pointer",
           "phx-click": "show-profile",
-          "phx-value-user-id": @message.user.id,
-          do: img class: "h-10 w-10 rounded", src: user_avatar_path(@message.user)
+          "phx-value-user-id": @message.user.id do
+          c &user_avatar/1, class: "h-10 w-10 rounded", user: @message.user
+        end
 
         div class: "ml-2" do
           div class: "-mt-1" do
