@@ -279,12 +279,20 @@ defmodule CcWeb.RealmsLive.Realm do
           user: @profile
       end
 
-      c &live_component/1,
-        id: "new-room-modal-component",
-        module: CcWeb.RealmsLive.Components.NewRoomModal,
-        current_user: @current_user,
-        show: @live_action == :new,
-        on_cancel: JS.navigate(~p"/realms/#{@room}")
+      ~H"""
+      <.modal
+        id="new-room-modal"
+        show={@live_action == :new}
+        on_cancel={JS.navigate(~p"/realms/#{@room}")}
+      >
+        <.header>New chat room</.header>
+        <.live_component
+          id="new-room-form-component"
+          module={CcWeb.RealmsLive.Components.NewRoomForm}
+          current_user={@current_user}
+        />
+      </.modal>
+      """
     end
   end
 
