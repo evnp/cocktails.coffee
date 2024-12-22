@@ -4,7 +4,7 @@ defmodule CcWeb.UserComponents do
   alias Cc.Accounts.User
 
   attr :user, User
-  attr :class, :string
+  attr :class, :string, default: ""
 
   def user_avatar(assigns) do
     temple do

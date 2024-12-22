@@ -276,9 +276,11 @@ defmodule CcWeb.RealmsLive.Realm do
         c &live_component/1,
           id: "profile-component",
           module: CcWeb.RealmsLive.Components.Profile,
-          user: @profile
+          user: @profile,
+          current_user: @current_user
       end
 
+      # Note: Must use HEEx here due to Temple issue [mhanberg/temple/issues/254]
       ~H"""
       <.modal
         id="new-room-modal"
