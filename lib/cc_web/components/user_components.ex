@@ -8,7 +8,7 @@ defmodule CcWeb.UserComponents do
 
   def user_avatar(assigns) do
     temple do
-      img src: user_avatar_path(@user), class: @class
+      img "data-user-avatar-id": @user.id, src: user_avatar_path(@user), class: @class
     end
   end
 

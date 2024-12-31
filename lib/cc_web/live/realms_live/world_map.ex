@@ -76,11 +76,7 @@ defmodule CcWeb.RealmsLive.WorldMap do
       end
 
       ~H"""
-      <.modal
-        id="new-room-modal"
-        show={@live_action == :new}
-        on_cancel={JS.navigate(~p"/realms")}
-      >
+      <.modal id="new-room-modal" show={@live_action == :new} on_cancel={JS.navigate(~p"/realms")}>
         <.header>New chat room</.header>
         <.live_component
           id="new-room-form-component"

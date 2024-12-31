@@ -521,6 +521,7 @@ defmodule CcWeb.RealmsLive.Realm do
     rooms = Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user)
 
     OnlineUsers.subscribe()
+    Accounts.subscribe_to_user_avatars()
     Enum.each(rooms, fn {room, _} -> Chat.room_pubsub_subscribe(room) end)
 
     socket
@@ -708,5 +709,29 @@ defmodule CcWeb.RealmsLive.Realm do
     socket
     |> assign(online_users: OnlineUsers.update(socket.assigns.online_users, diff))
     |> noreply()
+  end
+
+  def handle_info({:updated_avatar, user}, socket) do
+    socket
+    |> maybe_update_profile(user)
+    |> maybe_update_current_user(user)
+    |> push_event("update_avatar", %{user_id: user.id, avatar_path: user.avatar_path})
+    |> noreply()
+  end
+
+  defp maybe_update_current_user(socket, user) do
+    if socket.assigns.current_user.id == user.id do
+      assign(socket, :current_user, user)
+    else
+      socket
+    end
+  end
+
+  defp maybe_update_profile(socket, user) do
+    if socket.assigns[:profile] && socket.assigns.profile.id == user.id do
+      assign(socket, :profile, user)
+    else
+      socket
+    end
   end
 end

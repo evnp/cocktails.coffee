@@ -33,7 +33,6 @@ defmodule CcWeb.RealmsLive.Components.Profile do
                 "phx-change": "validate-avatar",
                 "phx-submit": "submit-avatar",
                 "phx-target": @myself do
-
                 div class: "mb-4" do
                   if Enum.any?(@uploads.avatar.entries) do
                     div class: "mx-auto mb-2 w-48" do
@@ -42,11 +41,12 @@ defmodule CcWeb.RealmsLive.Components.Profile do
                         entry: List.first(@uploads.avatar.entries),
                         width: 192,
                         height: 192
+
                       button type: "submit",
-                        class: [
-                          "w-full bg-emerald-600 hover:bg-emerald-700",
-                          "text-white rounded mt-2 py-1 shadow"
-                        ] do
+                             class: [
+                               "w-full bg-emerald-600 hover:bg-emerald-700",
+                               "text-white rounded mt-2 py-1 shadow"
+                             ] do
                         "Save"
                       end
                     end
@@ -77,7 +77,7 @@ defmodule CcWeb.RealmsLive.Components.Profile do
   def mount(socket) do
     socket
     |> allow_upload(:avatar,
-      accept: ~w(.png .jpg),
+      accept: ~w(.png .jpg .jpeg),
       max_entries: 1,
       max_file_size: 2 * 1024 * 1024
     )
