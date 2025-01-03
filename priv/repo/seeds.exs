@@ -50,6 +50,7 @@ for {user, message} <- [
       {aragorn,
        "You cannot wield it! None of us can. The One Ring answers to Sauron alone. It has no other master."},
       {boromir, "And what would a ranger know of this matter?"}
-    ] do
+    ]
+do
   Repo.insert!(%Message{user: user, room: council, body: message})
 end

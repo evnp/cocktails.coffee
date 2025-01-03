@@ -41,7 +41,8 @@ defmodule CcWeb.UserLoginLiveTest do
 
     test "redirects to login page with a flash error if there are no valid credentials", %{
       conn: conn
-    } do
+    }
+    do
       {:ok, lv, _html} = live(conn, ~p"/users/login")
 
       form =
@@ -72,7 +73,8 @@ defmodule CcWeb.UserLoginLiveTest do
 
     test "redirects to forgot password page when the Forgot Password button is clicked", %{
       conn: conn
-    } do
+    }
+    do
       {:ok, lv, _html} = live(conn, ~p"/users/login")
 
       {:ok, conn} =

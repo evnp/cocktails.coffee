@@ -18,7 +18,8 @@ defmodule CcWeb.RealmsLive.Components.Profile do
                  class: [
                    "w-6 h-6 rounded hover:bg-gray-300 ml-auto",
                    "flex items-center justify-center"
-                 ] do
+                 ]
+          do
             c &icon/1, name: "hero-x-mark", class: "w-5 h-5"
           end
         end
@@ -32,7 +33,8 @@ defmodule CcWeb.RealmsLive.Components.Profile do
                 for: %{},
                 "phx-change": "validate-avatar",
                 "phx-submit": "submit-avatar",
-                "phx-target": @myself do
+                "phx-target": @myself
+              do
                 div class: "mb-4" do
                   if Enum.any?(@uploads.avatar.entries) do
                     div class: "mx-auto mb-2 w-48" do
@@ -46,7 +48,8 @@ defmodule CcWeb.RealmsLive.Components.Profile do
                              class: [
                                "w-full bg-emerald-600 hover:bg-emerald-700",
                                "text-white rounded mt-2 py-1 shadow"
-                             ] do
+                             ]
+                      do
                         "Save"
                       end
                     end

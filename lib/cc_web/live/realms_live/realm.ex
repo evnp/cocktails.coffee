@@ -15,7 +15,8 @@ defmodule CcWeb.RealmsLive.Realm do
         div class: [
               "h-16 px-4",
               "flex justify-between items-center flex-shrink-0"
-            ] do
+            ]
+        do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-lg font-bold text-gray-800" do
               "Middle Earth"
@@ -42,21 +43,24 @@ defmodule CcWeb.RealmsLive.Realm do
             button class: [
                      "group relative flex items-center h-8 text-sm",
                      "pl-8 pr-3 hover:bg-slate-300 cursor-pointer w-full"
-                   ] do
+                   ]
+            do
               c &icon/1, name: "hero-map", class: "h-4 w-4 relative top-px"
               span class: "ml-2 leading-none", do: "Explore"
 
               div class: [
                     "hidden group-focus:block cursor-default absolute top-8 right-2",
                     "bg-white border-slate-200 border py-3 rounded-lg"
-                  ] do
+                  ]
+              do
                 div class: "w-full text-left" do
                   div class: "hover:bg-sky-600" do
                     div "phx-click": JS.navigate(~p"/realms"),
                         class: [
                           "cursor-pointer whitespace-nowrap text-gray-800",
                           "hover:text-white px-6 py-1"
-                        ] do
+                        ]
+                    do
                       "Shadow Realm"
                     end
                   end
@@ -67,7 +71,8 @@ defmodule CcWeb.RealmsLive.Realm do
                       class: [
                         "cursor-pointer whitespace-nowrap text-gray-800",
                         "hover:text-white px-6 py-1 block"
-                      ] do
+                      ]
+                  do
                     "New Realm"
                   end
                 end
@@ -98,7 +103,8 @@ defmodule CcWeb.RealmsLive.Realm do
         div class: [
               "h-16 px-4 shadow",
               "flex justify-between items-center flex-shrink-0"
-            ] do
+            ]
+        do
           div class: "flex flex-col gap-1.5" do
             h1 class: "text-sm font-bold leading-none" do
               "#" <> @room.name
@@ -106,14 +112,16 @@ defmodule CcWeb.RealmsLive.Realm do
               if @joined_room? do
                 c &link/1,
                   class: "font-normal text-xs text-blue-600 hover:text-blue-700",
-                  navigate: ~p"/realms/#{@room}/edit" do
+                  navigate: ~p"/realms/#{@room}/edit"
+                do
                   c &icon/1, name: "hero-pencil", class: "h-4 w-4 ml-1 -mt-2"
                 end
               end
             end
 
             div class: "text-xs leading-none h-3.5 cursor-pointer",
-                "phx-click": "toggle-topic" do
+                "phx-click": "toggle-topic"
+            do
               if @hide_topic? do
                 span class: "text-slate-600", do: "[Topic hidden]"
               else
@@ -124,13 +132,15 @@ defmodule CcWeb.RealmsLive.Realm do
 
           ul class: [
                "relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end"
-             ] do
+             ]
+          do
             li class: "text-[0.8125rem] leading-6 text-zinc-900" do
               div class: "text-sm leading-10" do
                 c &link/1,
                   class: "flex gap-4 items-center",
                   "phx-click": "show-profile",
-                  "phx-value-user-id": @current_user.id do
+                  "phx-value-user-id": @current_user.id
+                do
                   c &user_avatar/1, class: "h-8 w-8 rounded", user: @current_user
                   span class: "hover:underline", do: @current_user.username
                 end
@@ -143,7 +153,8 @@ defmodule CcWeb.RealmsLive.Realm do
                 class: [
                   "text-[0.8125rem] leading-6 text-zinc-900",
                   "font-semibold hover:text-zinc-700"
-                ] do
+                ]
+              do
                 "Settings"
               end
             end
@@ -155,7 +166,8 @@ defmodule CcWeb.RealmsLive.Realm do
                 class: [
                   "text-[0.8125rem] leading-6 text-zinc-900",
                   "font-semibold hover:text-zinc-700"
-                ] do
+                ]
+              do
                 "Log out"
               end
             end
@@ -165,7 +177,8 @@ defmodule CcWeb.RealmsLive.Realm do
         div id: "room-messages",
             class: "flex flex-col flex-grow overflow-auto",
             "phx-update": "stream",
-            "phx-hook": "RoomMessages" do
+            "phx-hook": "RoomMessages"
+        do
           for {dom_id, message_or_divider} <- @streams.messages do
             case message_or_divider do
               %Message{} ->
@@ -183,14 +196,16 @@ defmodule CcWeb.RealmsLive.Realm do
                          "-mt-3 bg-white h-6 px-3 rounded-full border",
                          "text-xs font-semibold mx-auto",
                          "flex items-center justify-center"
-                       ] do
+                       ]
+                  do
                     format_date(message_or_divider)
                   end
                 end
 
               :unread_marker ->
                 div id: dom_id,
-                    class: "w-full flex text-red-500 items-center gap-3 pr-5" do
+                    class: "w-full flex text-red-500 items-center gap-3 pr-5"
+                do
                   div class: "w-full h-px grow bg-red-500"
                   div class: "text-sm", do: "New"
                 end
@@ -205,7 +220,8 @@ defmodule CcWeb.RealmsLive.Realm do
               class: "flex items-center",
               for: @new_message_form,
               "phx-change": "validate-message",
-              "phx-submit": "submit-message" do
+              "phx-submit": "submit-message"
+            do
               textarea id: "chat-message-textarea",
                        class: [
                          "flex-grow text-sm p-4 bg-transparent",
@@ -217,7 +233,8 @@ defmodule CcWeb.RealmsLive.Realm do
                        placeholder: "Message ##{@room.name}",
                        "phx-debounce": true,
                        "phx-hook": "ChatMessageTextarea",
-                       rows: "1" do
+                       rows: "1"
+              do
                 Phoenix.HTML.Form.normalize_value(
                   "textarea",
                   @new_message_form[:body].value
@@ -227,7 +244,8 @@ defmodule CcWeb.RealmsLive.Realm do
               button class: [
                        "h-8 w-8 mr-2 rounded flex-shrink flex items-center justify-center",
                        "hover:bg-slate-200 transition-colors"
-                     ] do
+                     ]
+              do
                 c &icon/1, name: "hero-paper-airplane", class: "h-4 w-4"
               end
             end
@@ -238,7 +256,8 @@ defmodule CcWeb.RealmsLive.Realm do
           div class: [
                 "mx-5 mb-5 p-6 bg-slate-100 border-slate-300 border rounded-lg",
                 "flex justify-around"
-              ] do
+              ]
+          do
             div class: "max-w-3-xl text-center" do
               div class: "mb-4" do
                 h1 class: "text-xl font-semibold", do: "##{@room.name}"
@@ -253,7 +272,8 @@ defmodule CcWeb.RealmsLive.Realm do
                        class: [
                          "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-600",
                          "focus:outline-none focus:ring-2 focus:ring-green-500"
-                       ] do
+                       ]
+                do
                   "Enter realm"
                 end
               end
@@ -262,7 +282,8 @@ defmodule CcWeb.RealmsLive.Realm do
                 c &link/1,
                   navigate: ~p"/realms",
                   href: "#",
-                  class: "text-sm text-slate-500 underline hover:text-slate-600" do
+                  class: "text-sm text-slate-500 underline hover:text-slate-600"
+                do
                   "Go back to the shadow realm "
                   c &icon/1, name: "hero-arrow-uturn-left", class: "h-4 w-4"
                 end
@@ -331,7 +352,8 @@ defmodule CcWeb.RealmsLive.Realm do
     temple do
       button id: @dom_id,
              class: "flex items-center flex-grow focus:outline-none",
-             "phx-click": @on_click do
+             "phx-click": @on_click
+      do
         c &icon/1,
           id: @dom_id <> "-chevron-down",
           name: "hero-chevron-down",
@@ -373,7 +395,8 @@ defmodule CcWeb.RealmsLive.Realm do
         class: [
           "flex items-center h-8 text-sm pl-8 pr-3",
           if(@active, do: "bg-slate-300", else: "hover:bg-slate-300")
-        ] do
+        ]
+      do
         c &icon/1, name: "hero-hashtag", class: "h-4 w-4"
         span class: ["ml-2 leading-none", @active && "font-bold"], do: @room.name
         c &unread_message_counter/1, count: @unread_count
@@ -396,14 +419,16 @@ defmodule CcWeb.RealmsLive.Realm do
                  class: [
                    "absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer",
                    "opacity-0 group-hover:opacity-100 transition"
-                 ] do
+                 ]
+          do
             c &icon/1, name: "hero-trash", class: "h-4 w-4"
           end
         end
 
         a class: "flex-shrink-0 cursor-pointer",
           "phx-click": "show-profile",
-          "phx-value-user-id": @message.user.id do
+          "phx-value-user-id": @message.user.id
+        do
           c &user_avatar/1, class: "h-10 w-10 rounded", user: @message.user
         end
 
@@ -435,7 +460,8 @@ defmodule CcWeb.RealmsLive.Realm do
         span class: [
                "bg-blue-500 rounded-full font-medium h-5 px-2 ml-auto text-xs text-white",
                "flex items-center justify-center"
-             ] do
+             ]
+        do
           @count
         end
       end
@@ -449,7 +475,8 @@ defmodule CcWeb.RealmsLive.Realm do
     temple do
       c &link/1,
         class: "flex items-center h-8 hover:bg-gray-300 text-sm pl-8 pr-3",
-        href: "#" do
+        href: "#"
+      do
         div class: "flex justify-center w-4" do
           if @online do
             span class: "w-2 h-2 rounded-full bg-blue-500"

@@ -103,7 +103,8 @@ defmodule CcWeb.UserResetPasswordLiveTest do
     test "redirects to registration page when the Register button is clicked", %{
       conn: conn,
       token: token
-    } do
+    }
+    do
       {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
 
       {:ok, conn} =

@@ -13,7 +13,8 @@ defmodule CcWeb.RoomComponents do
         for: @form,
         "phx-change": "validate-room",
         "phx-submit": "save-room",
-        "phx-target": @target do
+        "phx-target": @target
+      do
         slot :actions do
           c &button/1, "phx-disable-with": "Saving...", class: "w-full", do: "Save"
         end

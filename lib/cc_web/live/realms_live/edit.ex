@@ -12,7 +12,8 @@ defmodule CcWeb.RealmsLive.Edit do
           slot :actions do
             c &link/1,
               class: "font-normal text-xs text-blue-600 hover:text-blue-700",
-              navigate: ~p"/realms/#{@room}" do
+              navigate: ~p"/realms/#{@room}"
+            do
               c &icon/1, name: "hero-arrow-uturn-left", class: "h-4 w-4"
             end
           end

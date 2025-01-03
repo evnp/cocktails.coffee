@@ -14,7 +14,8 @@ defmodule CcWeb.RealmsLive.WorldMap do
                  class: [
                    "bg-white font-semibold py-2 px-4 border border-slate-400",
                    "rounded shadow-sm"
-                 ] do
+                 ]
+          do
             "Create realm"
           end
         end
@@ -28,7 +29,8 @@ defmodule CcWeb.RealmsLive.WorldMap do
                     "flex justify-between items-center"
                   ],
                   "phx-value-id": room.id,
-                  "phx-click": JS.navigate(~p"/realms/#{room}") do
+                  "phx-click": JS.navigate(~p"/realms/#{room}")
+              do
                 div do
                   div class: "font-medium mb-1" do
                     "##{room.name}"
@@ -36,7 +38,8 @@ defmodule CcWeb.RealmsLive.WorldMap do
                     span class: [
                            "mx-1 text-gray-500 font-light text-sm",
                            "opacity-0 group-hover:opacity-100"
-                         ] do
+                         ]
+                    do
                       "View room"
                     end
                   end
@@ -62,7 +65,8 @@ defmodule CcWeb.RealmsLive.WorldMap do
                          "opacity-0 group-hover:opacity-100 bg-white hover:bg-gray-100",
                          "border border-gray-400 text-gray-700 px-3 py-1.5",
                          "rounded-sm font-bold"
-                       ] do
+                       ]
+                do
                   if joined_room? do
                     "Leave realm"
                   else
