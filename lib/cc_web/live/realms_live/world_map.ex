@@ -6,51 +6,45 @@ defmodule CcWeb.RealmsLive.WorldMap do
 
   def render(assigns) do
     temple do
-      main class: "flex-1 p-6 max-w-4xl mx-auto" do
-        div class: "flex justify-between mb-4 items-center" do
-          h1 class: "text-xl font-semibold", do: @page_title
+      main class: ~w"flex-1 p-6 max-w-4xl mx-auto" do
+        div class: ~w"flex justify-between mb-4 items-center" do
+          h1 class: ~w"text-xl font-semibold", do: @page_title
 
           button "phx-click": JS.navigate(~p"/realms/new"),
-                 class: [
-                   "bg-white font-semibold py-2 px-4 border border-slate-400",
-                   "rounded shadow-sm"
-                 ]
+                 class: ~w"bg-white font-semibold py-2 px-4 border border-slate-400
+                           rounded shadow-sm"
           do
             "Create realm"
           end
         end
 
-        div class: "bg-slate-50 border rounded" do
-          div id: "rooms", "phx-update": "stream", class: "divide-y" do
+        div class: ~w"bg-slate-50 border rounded" do
+          div id: "rooms", "phx-update": "stream", class: ~w"divide-y" do
             for {id, {room, joined_room?}} <- @streams.rooms do
               div id: id,
-                  class: [
-                    "group p-4 cursor-pointer first:rounded-t last:rounded-b",
-                    "flex justify-between items-center"
-                  ],
+                  class: ~w"flex justify-between items-center
+                            group p-4 cursor-pointer first:rounded-t last:rounded-b",
                   "phx-value-id": room.id,
                   "phx-click": JS.navigate(~p"/realms/#{room}")
               do
                 div do
-                  div class: "font-medium mb-1" do
+                  div class: ~w"font-medium mb-1" do
                     "##{room.name}"
 
-                    span class: [
-                           "mx-1 text-gray-500 font-light text-sm",
-                           "opacity-0 group-hover:opacity-100"
-                         ]
+                    span class: ~w"mx-1 text-gray-500 font-light text-sm
+                                   opacity-0 group-hover:opacity-100"
                     do
                       "View room"
                     end
                   end
 
-                  div class: "text-gray-500 text-sm" do
+                  div class: ~w"text-gray-500 text-sm" do
                     if joined_room? do
-                      span class: "text-green-600 font-bold", do: "✓ Joined"
+                      span class: ~w"text-green-600 font-bold", do: "✓ Joined"
                     end
 
                     if joined_room? && room.topic do
-                      span class: "mx-1", do: "·"
+                      span class: ~w"mx-1", do: "·"
                     end
 
                     if room.topic do
@@ -61,11 +55,10 @@ defmodule CcWeb.RealmsLive.WorldMap do
 
                 button "phx-click": "toggle-room-membership",
                        "phx-value-id": room.id,
-                       class: [
-                         "opacity-0 group-hover:opacity-100 bg-white hover:bg-gray-100",
-                         "border border-gray-400 text-gray-700 px-3 py-1.5",
-                         "rounded-sm font-bold"
-                       ]
+                       class: ~w"opacity-0 group-hover:opacity-100
+                                 bg-white hover:bg-gray-100
+                                 border border-gray-400 text-gray-700 px-3 py-1.5
+                                 rounded-sm font-bold"
                 do
                   if joined_room? do
                     "Leave realm"

@@ -7,14 +7,14 @@ defmodule CcWeb.RealmsLive.Edit do
 
   def render(assigns) do
     temple do
-      div class: "mx-auto w-96 mt-12" do
+      div class: ~w"mx-auto w-96 mt-12" do
         c &header/1 do
           slot :actions do
             c &link/1,
-              class: "font-normal text-xs text-blue-600 hover:text-blue-700",
+              class: ~w"font-normal text-xs text-blue-600 hover:text-blue-700",
               navigate: ~p"/realms/#{@room}"
             do
-              c &icon/1, name: "hero-arrow-uturn-left", class: "h-4 w-4"
+              c &icon/1, name: "hero-arrow-uturn-left", class: ~w"h-4 w-4"
             end
           end
 
