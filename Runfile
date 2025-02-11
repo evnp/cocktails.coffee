@@ -1,7 +1,4 @@
-install: # install dependencies
-  mix deps.get
-
-start: kill install # (re)start application from scratch
+start: kill install # start application
   bash -c 'trap "loading fin" EXIT; loading; tmex phoenix -qd "mix phx.server"; sleep 5'
   run open
   run logs
@@ -28,3 +25,12 @@ format: # format
 seed: # insert test data into database
   mix run priv/repo/seeds.exs
 
+clean: # remove dependencies and build files
+  rm -rf _build deps
+
+install: # install dependencies
+  mix deps.get
+  mix compile.rambo # needed for FilterFormatter package
+
+reinstall: clean install # reinstall dependencies from scratch
+restart: reinstall start # restart application after reinstalling dependencies
