@@ -1,4 +1,4 @@
-defmodule CcWeb.Util do
+defmodule CcWeb.Util.Live do
   def ok(socket) do
     {:ok, socket}
   end

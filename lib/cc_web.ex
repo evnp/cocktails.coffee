@@ -57,7 +57,7 @@ defmodule CcWeb do
         layout: {CcWeb.Layouts, :app}
 
       # Import LiveView-specific utility functions:
-      import CcWeb.Util
+      import CcWeb.Util.Live
 
       # Include "unique words" ~u sigil for HTML element classes:
       import CcWeb.Sigils.UniqueWords
@@ -83,7 +83,7 @@ defmodule CcWeb do
       use Phoenix.LiveComponent
 
       # Import LiveView-specific utility functions:
-      import CcWeb.Util
+      import CcWeb.Util.Live
 
       # Include "unique words" ~u sigil for HTML element classes:
       import CcWeb.Sigils.UniqueWords
