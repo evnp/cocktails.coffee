@@ -59,6 +59,9 @@ defmodule CcWeb do
       # Import LiveView-specific utility functions:
       import CcWeb.Util
 
+      # Include "unique words" ~u sigil for HTML element classes:
+      import CcWeb.Sigils.UniqueWords
+
       unquote(html_helpers())
     end
   end
@@ -67,6 +70,10 @@ defmodule CcWeb do
     quote do
       use Phoenix.Component
 
+      # Include "unique words" ~u sigil for HTML element classes:
+      import CcWeb.Sigils.UniqueWords
+
+      # Include general helpers for rendering HTML
       unquote(html_helpers())
     end
   end
@@ -78,6 +85,10 @@ defmodule CcWeb do
       # Import LiveView-specific utility functions:
       import CcWeb.Util
 
+      # Include "unique words" ~u sigil for HTML element classes:
+      import CcWeb.Sigils.UniqueWords
+
+      # Include general helpers for rendering HTML
       unquote(html_helpers())
     end
   end

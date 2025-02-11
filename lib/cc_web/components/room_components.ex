@@ -16,7 +16,7 @@ defmodule CcWeb.RoomComponents do
         "phx-target": @target
       do
         slot :actions do
-          c &button/1, "phx-disable-with": "Saving...", class: ~w"w-full", do: "Save"
+          c &button/1, "phx-disable-with": "Saving...", class: ~u"w-full", do: "Save"
         end
 
         c &input/1,
