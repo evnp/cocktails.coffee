@@ -1,4 +1,6 @@
 defmodule CcWeb.Sigils.UniqueWords do
+  import CcWeb.Util.StringUtils, only: [collapse_whitespace: 1]
+
   defmacro sigil_u(term, modifiers)
 
   defmacro sigil_u({:<<>>, _meta, [string]}, modifiers) when is_binary(string) do
@@ -28,14 +30,14 @@ defmodule CcWeb.Sigils.UniqueWords do
        when modifier == ?s or modifier == ?l or modifier == ?a or modifier == ?c do
     if is_binary(input) do
       case modifier do
-        ?s -> String.replace(input, ~r"\s+", " ")
+        ?s -> collapse_whitespace(input)
         ?l -> String.split(input)
         ?a -> :lists.map(&String.to_atom/1, String.split(input))
         ?c -> :lists.map(&String.to_charlist/1, String.split(input))
       end
     else
       case modifier do
-        ?s -> quote(do: String.replace(unquote(input), ~r"\s+", " "))
+        ?s -> quote(do: collapse_whitespace(unquote(input)))
         ?l -> quote(do: String.split(unquote(input)))
         ?a -> quote(do: :lists.map(&String.to_atom/1, String.split(unquote(input))))
         ?c -> quote(do: :lists.map(&String.to_charlist/1, String.split(unquote(input))))
