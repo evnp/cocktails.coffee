@@ -4,23 +4,24 @@ defmodule CcWeb.Sigils.UniqueWords do
   defmacro sigil_u(term, modifiers)
 
   defmacro sigil_u({:<<>>, _meta, [string]}, modifiers) when is_binary(string) do
-    check_unique_words(:elixir_interpolation.unescape_string(string), __CALLER__)
-    |> handle_modifiers(modifiers)
+    unescaped = :elixir_interpolation.unescape_string(string)
+    check_unique_words(unescaped, %MapSet{}, __CALLER__)
+    handle_modifiers(unescaped, modifiers)
   end
 
   defmacro sigil_u({:<<>>, meta, tokens}, modifiers) do
-    checked_escaped_tokens = Enum.map(
-      tokens,
-      fn token ->
-        if is_binary(token) do
-          check_unique_words(:elixir_interpolation.unescape_string(token), __CALLER__)
-        else
-          token
-        end
+    {tokens, _} = Enum.reduce(tokens, {[], %MapSet{}}, fn token, {tokens, word_set} ->
+      if is_binary(token) do
+        unescaped = :elixir_interpolation.unescape_string(token)
+        word_set = check_unique_words(unescaped, word_set, __CALLER__)
+        {[unescaped | tokens], word_set}
+      else
+        {[token | tokens], word_set}
       end
-    )
+    end)
 
-    {:<<>>, meta, checked_escaped_tokens}
+    # Reverse tokens here so that we can use more-efficient list-prepend ops above.
+    {:<<>>, meta, Enum.reverse(tokens)}
     |> handle_modifiers(modifiers)
   end
 
@@ -49,22 +50,23 @@ defmodule CcWeb.Sigils.UniqueWords do
     raise ArgumentError, "modifier must be one of: s, l, a, c"
   end
 
-  defp check_unique_words(string, caller) do
-    words = String.split(string, " ")
+  defp check_unique_words(string, word_set, caller) do
+    word_list = String.split(string, " ")
 
-    has_duplicates = true == Enum.reduce_while(words, %MapSet{}, fn word, acc ->
+    {duplicate_word, word_set} = Enum.reduce_while(word_list, {false, word_set}, fn word, {_, word_set} ->
       cond do
-        word == "" -> {:cont, acc}
-        MapSet.member?(acc, word) -> {:halt, true}
-        true -> {:cont, MapSet.put(acc, word)}
+        word == "" -> {:cont, {false, word_set}}
+        MapSet.member?(word_set, word) -> {:halt, {word, word_set}}
+        true ->
+          word_set = MapSet.put(word_set, word)
+          {:cont, {false, word_set}}
       end
     end)
 
-    if has_duplicates do
-      joined = Enum.join(words, " ")
-      IO.warn("Duplicate words in '#{joined}'", Macro.Env.stacktrace(caller))
+    if duplicate_word do
+      IO.warn("Duplicate word (#{duplicate_word})", Macro.Env.stacktrace(caller))
     end
 
-    string
+    word_set
   end
 end
