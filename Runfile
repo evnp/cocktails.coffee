@@ -13,8 +13,12 @@ open: # open client
 logs: # attach to server
   tmex phoenix --reattach
 
-repl: # start interactive shell
+repl: compile # start interactive shell
   iex -S mix
+
+compile: # recompile files on change in background
+  tmex mix-compile --kill
+  tmex mix-compile --detached 'git ls-files | entr mix compile'
 
 test: # run tests
   mix test
