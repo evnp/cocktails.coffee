@@ -15,7 +15,7 @@
       extensions: [".ex", ".exs"],
       executable: "perl",
       args: [
-        "-0777",  # Turn-on whole-file processing so regex operate over multiple lines.
+        "-0777", # Turn-on whole-file processing so regex operate over multiple lines.
         "-pe",
         # The following regex handles cases where "do" is preceded by any number
         # of closing braces, most commonly "] do", but also cases such as "})] do".
@@ -27,7 +27,7 @@
         ~s"""
           s/
             \\n( *)([^ ]+|"[^"]*"): (
-              [^ ]+|#{  # This pattern handles unquoted keyword-list values.
+              [^ ]+|#{ # This pattern handles unquoted keyword-list values.
                 # These open/close chars are handled by constructed regex below:
                 ~w"""
                 () {} [] <> "" '' || //
@@ -46,7 +46,7 @@
             \\n\\1\\2: \\3\\n\\4do\\n  \\4
           /g;
         """
-        |> String.replace(~r/(\r|\n)+\s*/, "")  # Ignore newlines+indentation above.
+        |> String.replace(~r/(\r|\n)+\s*/, "") # Ignore newlines+indentation above.
         # Above regex handles unquoted or quoted keyword-list keys.
         # Above regex handles these types of keyword-list values:
         #

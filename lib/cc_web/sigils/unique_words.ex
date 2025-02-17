@@ -5,15 +5,17 @@ defmodule CcWeb.Sigils.UniqueWords do
 
   defmacro sigil_u({:<<>>, _meta, [string]}, modifiers) when is_binary(string) do
     unescaped = :elixir_interpolation.unescape_string(string)
-    check_unique_words(unescaped, %MapSet{}, __CALLER__)
+    warn = modifiers != [] && ?w in modifiers
+    check_unique_words(unescaped, %MapSet{}, __CALLER__, warn: warn)
     handle_modifiers(unescaped, modifiers)
   end
 
   defmacro sigil_u({:<<>>, meta, tokens}, modifiers) do
+    warn = modifiers != [] && ?w in modifiers
     {tokens, _} = Enum.reduce(tokens, {[], %MapSet{}}, fn token, {tokens, word_set} ->
       if is_binary(token) do
         unescaped = :elixir_interpolation.unescape_string(token)
-        word_set = check_unique_words(unescaped, word_set, __CALLER__)
+        word_set = check_unique_words(unescaped, word_set, __CALLER__, warn: warn)
         {[unescaped | tokens], word_set}
       else
         {[token | tokens], word_set}
@@ -25,32 +27,48 @@ defmodule CcWeb.Sigils.UniqueWords do
     |> handle_modifiers(modifiers)
   end
 
-  defp handle_modifiers(input, []), do: handle_modifiers(input, [?s])
+  defmacro valid_modifiers, do: ~w[s l a c w sw lw aw cw ws wl wa wc]c
 
-  defp handle_modifiers(input, [modifier])
-       when modifier == ?s or modifier == ?l or modifier == ?a or modifier == ?c do
-    if is_binary(input) do
-      case modifier do
-        ?s -> collapse_whitespace(input)
-        ?l -> String.split(input)
-        ?a -> :lists.map(&String.to_atom/1, String.split(input))
-        ?c -> :lists.map(&String.to_charlist/1, String.split(input))
-      end
-    else
-      case modifier do
-        ?s -> quote(do: collapse_whitespace(unquote(input)))
-        ?l -> quote(do: String.split(unquote(input)))
-        ?a -> quote(do: :lists.map(&String.to_atom/1, String.split(unquote(input))))
-        ?c -> quote(do: :lists.map(&String.to_charlist/1, String.split(unquote(input))))
-      end
+  defmacro invalid_modifier_message do
+    "~u sigil modifiers must be one of: #{valid_modifiers() |> Enum.join(", ")}"
+  end
+
+  defp handle_modifiers(_string, modifiers)
+      when modifiers != [] and modifiers not in valid_modifiers() do
+    raise ArgumentError, invalid_modifier_message()
+  end
+
+  defp handle_modifiers(input, modifiers) when is_binary(input) do
+    cond do
+      modifiers == [] or modifiers in ~w[s w sw ws]c ->
+        collapse_whitespace(input)
+      modifiers in ~w[l lw wl]c ->
+        String.split(input)
+      modifiers in ~w[a aw wa]c ->
+        :lists.map(&String.to_atom/1, String.split(input))
+      modifiers in ~w[c cw wc]c ->
+        :lists.map(&String.to_charlist/1, String.split(input))
+      true ->
+        raise ArgumentError, invalid_modifier_message()
     end
   end
 
-  defp handle_modifiers(_string, _modifiers) do
-    raise ArgumentError, "modifier must be one of: s, l, a, c"
+  defp handle_modifiers(input, modifiers) do
+    cond do
+      modifiers == [] or modifiers in ~w[s w sw ws]c ->
+        quote(do: collapse_whitespace(unquote(input)))
+      modifiers in ~w[l lw wl]c ->
+        quote(do: String.split(unquote(input)))
+      modifiers in ~w[a aw wa]c ->
+        quote(do: :lists.map(&String.to_atom/1, String.split(unquote(input))))
+      modifiers in ~w[c cw wc]c ->
+        quote(do: :lists.map(&String.to_charlist/1, String.split(unquote(input))))
+      true ->
+        raise ArgumentError, invalid_modifier_message()
+    end
   end
 
-  defp check_unique_words(string, word_set, caller) do
+  defp check_unique_words(string, word_set, caller, options) do
     word_list = String.split(string, " ")
 
     {duplicate_word, word_set} = Enum.reduce_while(word_list, {false, word_set}, fn word, {_, word_set} ->
@@ -64,7 +82,13 @@ defmodule CcWeb.Sigils.UniqueWords do
     end)
 
     if duplicate_word do
-      IO.warn("Duplicate word (#{duplicate_word})", Macro.Env.stacktrace(caller))
+      message = "Duplicate word (#{duplicate_word})"
+
+      if !!options[:warn] do
+        IO.warn(message, Macro.Env.stacktrace(caller))
+      else
+        raise message
+      end
     end
 
     word_set
