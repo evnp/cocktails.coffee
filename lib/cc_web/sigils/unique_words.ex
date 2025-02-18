@@ -45,9 +45,9 @@ defmodule CcWeb.Sigils.UniqueWords do
       modifiers in ~w[l lw wl]c ->
         String.split(input)
       modifiers in ~w[a aw wa]c ->
-        :lists.map(&String.to_atom/1, String.split(input))
+        Enum.map(String.split(input), &String.to_atom/1)
       modifiers in ~w[c cw wc]c ->
-        :lists.map(&String.to_charlist/1, String.split(input))
+        Enum.map(String.split(input), &String.to_charlist/1)
       true ->
         raise ArgumentError, invalid_modifier_message()
     end
@@ -60,9 +60,9 @@ defmodule CcWeb.Sigils.UniqueWords do
       modifiers in ~w[l lw wl]c ->
         quote(do: String.split(unquote(input)))
       modifiers in ~w[a aw wa]c ->
-        quote(do: :lists.map(&String.to_atom/1, String.split(unquote(input))))
+        quote(do: Enum.map(String.split(unquote(input)), &String.to_atom/1))
       modifiers in ~w[c cw wc]c ->
-        quote(do: :lists.map(&String.to_charlist/1, String.split(unquote(input))))
+        quote(do: Enum.map(String.split(unquote(input)), &String.to_charlist/1))
       true ->
         raise ArgumentError, invalid_modifier_message()
     end
@@ -71,18 +71,20 @@ defmodule CcWeb.Sigils.UniqueWords do
   defp check_unique_words(string, word_set, caller, options) do
     word_list = String.split(string)
 
-    {duplicate_word, word_set} = Enum.reduce_while(word_list, {false, word_set}, fn word, {_, word_set} ->
-      cond do
-        word == "" -> {:cont, {false, word_set}}
-        MapSet.member?(word_set, word) -> {:halt, {word, word_set}}
-        true ->
-          word_set = MapSet.put(word_set, word)
-          {:cont, {false, word_set}}
+    {duplicate_word, word_set} = Enum.reduce_while(
+      word_list,
+      {false, word_set},
+      fn word, {_, word_set} ->
+        if MapSet.member?(word_set, word) do
+          {:halt, {word, word_set}}
+        else
+          {:cont, {false, MapSet.put(word_set, word)}}
+        end
       end
-    end)
+    )
 
     if duplicate_word do
-      message = "Duplicate word (#{duplicate_word})"
+      message = "Duplicate word: #{duplicate_word}"
 
       if !!options[:warn] do
         IO.warn(message, Macro.Env.stacktrace(caller))
