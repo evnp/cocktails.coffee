@@ -69,7 +69,7 @@ defmodule CcWeb.Sigils.UniqueWords do
   end
 
   defp check_unique_words(string, word_set, caller, options) do
-    word_list = String.split(string, " ")
+    word_list = String.split(string)
 
     {duplicate_word, word_set} = Enum.reduce_while(word_list, {false, word_set}, fn word, {_, word_set} ->
       cond do
