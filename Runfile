@@ -5,7 +5,7 @@ start: kill install # start application
 
 kill: # kill application
   pkill -f phx.server || true # ignore errors
-  tmex phoenix -qk    || true # ignore errors
+  tmex phoenix --kill --quiet
 
 open: # open client
   open http://localhost:4000
@@ -17,7 +17,7 @@ repl: compile # start interactive shell
   iex -S mix
 
 compile: # recompile files on change in background
-  tmex mix-compile --kill
+  tmex mix-compile --kill --quiet
   tmex mix-compile --detached 'git ls-files | entr mix compile'
 
 test: # run tests
