@@ -273,21 +273,17 @@ defmodule CcWeb.RealmsLive.Realm do
           current_user: @current_user
       end
 
-      # Note: Must use HEEx here due to Temple issue [mhanberg/temple/issues/254]
-      ~H"""
-      <.modal
-        id="new-room-modal"
-        show={@live_action == :new}
-        on_cancel={JS.navigate(~p"/realms/#{@room}")}
-      >
-        <.header>New chat room</.header>
-        <.live_component
-          id="new-room-form-component"
-          module={CcWeb.RealmsLive.Components.NewRoomForm}
-          current_user={@current_user}
-        />
-      </.modal>
-      """
+      c &modal/1,
+        id: "new-room-modal",
+        show: @live_action == :new,
+        on_cancel: JS.navigate(~p"/realms/#{@room}")
+      do
+        c &header/1, do: "New chat room"
+        c &live_component/1,
+          id: "new-room-form-component",
+          module: CcWeb.RealmsLive.Components.NewRoomForm,
+          current_user: @current_user
+      end
     end
   end
 
@@ -436,6 +432,8 @@ defmodule CcWeb.RealmsLive.Realm do
         do
           @count
         end
+      else # TODO(temple) remove when resolved: mhanberg/temple/issues/264
+        span # TODO(temple) remove when resolved: mhanberg/temple/issues/264
       end
     end
   end
