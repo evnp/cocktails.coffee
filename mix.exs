@@ -58,6 +58,7 @@ defmodule Cc.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:temple, git: "git@github.com:mhanberg/temple.git"},
+      {:unique_words_sigil, "~> 0.1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},

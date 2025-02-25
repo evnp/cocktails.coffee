@@ -53,14 +53,10 @@ defmodule CcWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {CcWeb.Layouts, :app}
+      use Phoenix.LiveView, layout: {CcWeb.Layouts, :app}
 
       # Import LiveView-specific utility functions:
       import CcWeb.Util.Live
-
-      # Include "unique words" ~u sigil for HTML element classes:
-      import CcWeb.Sigils.UniqueWords
 
       unquote(html_helpers())
     end
@@ -69,9 +65,6 @@ defmodule CcWeb do
   def component do
     quote do
       use Phoenix.Component
-
-      # Include "unique words" ~u sigil for HTML element classes:
-      import CcWeb.Sigils.UniqueWords
 
       # Include general helpers for rendering HTML
       unquote(html_helpers())
@@ -84,9 +77,6 @@ defmodule CcWeb do
 
       # Import LiveView-specific utility functions:
       import CcWeb.Util.Live
-
-      # Include "unique words" ~u sigil for HTML element classes:
-      import CcWeb.Sigils.UniqueWords
 
       # Include general helpers for rendering HTML
       unquote(html_helpers())
@@ -110,6 +100,9 @@ defmodule CcWeb do
     quote do
       # HTML escaping functionality
       import Phoenix.HTML
+
+      # ~u "unique words" sigil for HTML element classes
+      import UniqueWordsSigil
 
       # Core UI components and translation
       import CcWeb.CoreComponents
