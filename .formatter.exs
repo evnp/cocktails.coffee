@@ -16,14 +16,32 @@
       executable: "perl",
       args: [
         "-0777", # Turn-on whole-file processing so regex operate over multiple lines.
+
+        # Trim extraneous whitespace from the beginning of ~u"..." strings:
         "-pe",
+        "s/~u\"\\s+/~u\"/g;",
+
+        # Collapse into single multiple spaces/newlines within ~u"..." strings:
+        "-pe",
+        "s/(?<=~u\"[^\"]{1,250}[^\"\\s])  +/ /g;",
+        # [NOTE] {1,250} limit needed to avoid Perl limitation:
+        # "Lookbehind longer than 255 not implemented in regex"
+
+        # Trim extraneous whitespace from the end of ~u"..." strings:
+        "-pe",
+        "s/(?<=~u\"[^\"]{1,250}[^\"\\s])\\s+\"/\"/g;",
+        # [NOTE] {1,250} limit needed to avoid Perl limitation:
+        # "Lookbehind longer than 255 not implemented in regex"
+
         # The following regex handles cases where "do" is preceded by any number
         # of closing braces, most commonly "] do", but also cases such as "})] do".
         # Any amount of whitespace can precede the braces in these situations.
-        "s/\\n( *)([\\]\\}\\)]+) do\\n  ( *)/\\n\\1\\2\\n\\3do\\n  \\3/g;",
         "-pe",
+        "s/\\n( *)([\\]\\}\\)]+) do\\n  ( *)/\\n\\1\\2\\n\\3do\\n  \\3/g;",
+
         # The following regex handles all other cases, where a keyword-list key/value
         # is followed directly by "do"; see documentation below for details.
+        "-pe",
         ~s"""
           s/
             \\n( *)([^ ]+|"[^"]*"): (
@@ -46,7 +64,7 @@
             \\n\\1\\2: \\3\\n\\4do\\n  \\4
           /g;
         """
-        |> String.replace(~r/(\r|\n)+\s*/, "") # Ignore newlines+indentation above.
+        |> String.replace(~r/(\r|\n)+\s*/, ""), # Ignore newlines+indentation above.
         # Above regex handles unquoted or quoted keyword-list keys.
         # Above regex handles these types of keyword-list values:
         #
@@ -63,6 +81,6 @@
         # "do" will always be set as 2 spaces less than the number of spaces at the
         # start of the following line.
       ]
-    ]
+    ],
   ]
 ]
