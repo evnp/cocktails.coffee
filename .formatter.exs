@@ -19,17 +19,22 @@
 
         # Trim extraneous whitespace from the beginning of ~u"..." strings:
         "-pe",
-        "s/~u\"\\s+/~u\"/g;",
-
+        ~S"""
+        s/~u\"\s+/~u\"/g;
+        """,
         # Collapse into single multiple spaces/newlines within ~u"..." strings:
         "-pe",
-        "s/(?<=~u\"[^\"]{1,250}[^\"\\s])  +/ /g;",
+        ~S"""
+        s/(?<=~u\"[^"]{1,250}[^"\s])  +/ /g;
+        """,
         # [NOTE] {1,250} limit needed to avoid Perl limitation:
         # "Lookbehind longer than 255 not implemented in regex"
 
         # Trim extraneous whitespace from the end of ~u"..." strings:
         "-pe",
-        "s/(?<=~u\"[^\"]{1,250}[^\"\\s])\\s+\"/\"/g;",
+        ~S"""
+        s/(?<=~u\"[^"]{1,250}[^"\s])\s+"/"/g;
+        """,
         # [NOTE] {1,250} limit needed to avoid Perl limitation:
         # "Lookbehind longer than 255 not implemented in regex"
 
@@ -37,8 +42,9 @@
         # of closing braces, most commonly "] do", but also cases such as "})] do".
         # Any amount of whitespace can precede the braces in these situations.
         "-pe",
-        "s/\\n( *)([\\]\\}\\)]+) do\\n  ( *)/\\n\\1\\2\\n\\3do\\n  \\3/g;",
-
+        ~S"""
+        s/\n( *)([\]\}\)]+) do\n  ( *)/\n\1\2\n\3do\n  \3/g;
+        """,
         # The following regex handles all other cases, where a keyword-list key/value
         # is followed directly by "do"; see documentation below for details.
         "-pe",
