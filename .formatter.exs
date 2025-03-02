@@ -1,3 +1,21 @@
+defmodule Perl do
+  def executable() do
+    "perl"
+  end
+
+  def args(arguments) do
+    List.flatten(arguments)
+  end
+
+  def multiline() do
+    "-0777" # Causes regex replacements to operate across newlines.
+  end
+
+  def replace(pattern, replacement) do
+    ["-pe", "s/#{pattern}/#{replacement}/g;"]
+  end
+end
+
 [
   import_deps: [:ecto, :ecto_sql, :phoenix, :temple],
   subdirectories: ["priv/*/migrations"],
@@ -13,64 +31,44 @@
   filter_formatter: [
     [
       extensions: [".ex", ".exs"],
-      executable: "perl",
-      args: [
-        "-0777", # Turn-on whole-file processing so regex operate over multiple lines.
-
+      executable: Perl.executable(),
+      args: Perl.args([
+        Perl.multiline(),
         # Trim extraneous whitespace from the beginning of ~u"..." strings:
-        "-pe",
-        ~S"""
-        s/~u\"\s+/~u\"/g;
-        """,
+        Perl.replace(~S'~u\"\s+', "~u\""),
         # Collapse into single multiple spaces/newlines within ~u"..." strings:
-        "-pe",
-        ~S"""
-        s/(?<=~u\"[^"]{1,250}[^"\s])  +/ /g;
-        """,
+        Perl.replace(~S'(?<=~u\"[^"]{1,250}[^"\s])  +', " "),
         # [NOTE] {1,250} limit needed to avoid Perl limitation:
         # "Lookbehind longer than 255 not implemented in regex"
 
         # Trim extraneous whitespace from the end of ~u"..." strings:
-        "-pe",
-        ~S"""
-        s/(?<=~u\"[^"]{1,250}[^"\s])\s+"/"/g;
-        """,
+        Perl.replace(~S'(?<=~u\"[^"]{1,250}[^"\s])\s+"', "\""),
         # [NOTE] {1,250} limit needed to avoid Perl limitation:
         # "Lookbehind longer than 255 not implemented in regex"
 
         # The following regex handles cases where "do" is preceded by any number
         # of closing braces, most commonly "] do", but also cases such as "})] do".
         # Any amount of whitespace can precede the braces in these situations.
-        "-pe",
-        ~S"""
-        s/\n( *)([\]\}\)]+) do\n  ( *)/\n\1\2\n\3do\n  \3/g;
-        """,
+        Perl.replace(~S'\n( *)([\]\}\)]+) do\n  ( *)', ~S'\n\1\2\n\3do\n  \3'),
         # The following regex handles all other cases, where a keyword-list key/value
         # is followed directly by "do"; see documentation below for details.
-        "-pe",
-        ~s"""
-          s/
-            \\n( *)([^ ]+|"[^"]*"): (
-              [^ ]+|#{ # This pattern handles unquoted keyword-list values.
-                # These open/close chars are handled by constructed regex below:
-                ~w"""
-                () {} [] <> "" '' || //
-                """
-                |> Enum.map(fn string ->
-                  open = String.at(string, 0)
-                  close = String.at(string, 1)
-                  # Optionally, handle sigil markers prior to open/close chars:
-                  sigil = "(?:~(?:[a-z]|[A-Z]+))"
-                  "#{sigil}?\\#{open}[^\\#{open}]*\\#{close}"
-                end)
-                |> Enum.join("|")
-              }
-            ) do\\n  ( *)
-          /
-            \\n\\1\\2: \\3\\n\\4do\\n  \\4
-          /g;
-        """
-        |> String.replace(~r/(\r|\n)+\s*/, ""), # Ignore newlines+indentation above.
+        Perl.replace(
+          ~s'\\n( *)([^ ]+|"[^"]*"): ([^ ]+|#{
+            ~w"""
+            () {} [] <> "" '' || //
+            """
+            # These open/close chars are handled by constructed regex below:
+            |> Enum.map(fn string ->
+              open = String.at(string, 0)
+              close = String.at(string, 1)
+              # Optionally, handle sigil markers prior to open/close chars:
+              sigil = "(?:~(?:[a-z]|[A-Z]+))"
+              "#{sigil}?\\#{open}[^\\#{open}]*\\#{close}"
+            end)
+            |> Enum.join("|")
+          }) do\\n  ( *)',
+          ~S'\n\1\2: \3\n\4do\n  \4'
+        ),
         # Above regex handles unquoted or quoted keyword-list keys.
         # Above regex handles these types of keyword-list values:
         #
@@ -86,7 +84,7 @@
         # of indentation after each "do" newline insertion. The number of spaces before
         # "do" will always be set as 2 spaces less than the number of spaces at the
         # start of the following line.
-      ]
-    ],
+      ])
+    ]
   ]
 ]
