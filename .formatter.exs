@@ -16,6 +16,11 @@ defmodule Perl do
   end
 end
 
+
+open_close_chars = ~w"""
+() {} [] <> "" '' || //
+"""
+
 [
   import_deps: [:ecto, :ecto_sql, :phoenix, :temple],
   subdirectories: ["priv/*/migrations"],
@@ -54,11 +59,7 @@ end
         # is followed directly by "do"; see documentation below for details.
         Perl.replace(
           ~s'\\n( *)([^ ]+|"[^"]*"): ([^ ]+|#{
-            ~w"""
-            () {} [] <> "" '' || //
-            """
-            # These open/close chars are handled by constructed regex below:
-            |> Enum.map(fn string ->
+            open_close_chars |> Enum.map(fn string ->
               open = String.at(string, 0)
               close = String.at(string, 1)
               # Optionally, handle sigil markers prior to open/close chars:
@@ -84,6 +85,26 @@ end
         # of indentation after each "do" newline insertion. The number of spaces before
         # "do" will always be set as 2 spaces less than the number of spaces at the
         # start of the following line.
+
+        # The following regex handles cases where a sigil value is split onto
+        # multiple lines, eg.
+        # div class: ~u\"this is a multiline
+        #               sigil value\"  do
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
+        # div class: ~u\"this is a multiline
+        #               sigil value\"
+        # do
+        Perl.replace(
+          ~s'(#{
+            open_close_chars |> Enum.map(fn string ->
+              open = String.at(string, 0)
+              close = String.at(string, 1)
+              "\\n\\s*[^\\#{open}\\#{close}]*\\#{close}"
+            end)
+            |> Enum.join("|")
+          }) do\\n  ( *)',
+          ~S'\1\n\2do\n  \2'
+        ),
       ])
     ]
   ]
