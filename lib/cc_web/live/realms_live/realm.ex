@@ -8,6 +8,7 @@ defmodule CcWeb.RealmsLive.Realm do
   alias CcWeb.OnlineUsers
 
   import CcWeb.UserComponents
+  import CcWeb.ChatComponents
 
   def render(assigns) do
     temple do
@@ -273,6 +274,16 @@ defmodule CcWeb.RealmsLive.Realm do
           current_user: @current_user
       end
 
+      if assigns[:thread] do
+        c &live_component/1,
+          id: "thread-component",
+          module: CcWeb.RealmsLive.Components.Thread,
+          current_user: @current_user,
+          message: @thread,
+          room: @room,
+          timezone: @timezone
+      end
+
       c &modal/1,
         id: "new-room-modal",
         show: @live_action == :new,
@@ -315,7 +326,6 @@ defmodule CcWeb.RealmsLive.Realm do
   attr :dom_id, :string, required: true
   attr :text, :string, required: true
   attr :on_click, JS, required: true
-
   defp toggler(assigns) do
     temple do
       button id: @dom_id,
@@ -355,7 +365,6 @@ defmodule CcWeb.RealmsLive.Realm do
   attr :active, :boolean, required: true
   attr :room, Room, required: true
   attr :unread_count, :integer, required: true
-
   defp room_link(assigns) do
     temple do
       c &link/1,
@@ -374,55 +383,7 @@ defmodule CcWeb.RealmsLive.Realm do
     end
   end
 
-  attr :message, Message, required: true
-  attr :current_user, User, required: true
-  attr :dom_id, :string, required: true
-  attr :timezone, :string, required: true
-
-  defp message(assigns) do
-    temple do
-      div id: @dom_id, class: ~u"group relative flex px-4 py-3" do
-        if @current_user.id == @message.user_id do
-          button "phx-click": "delete-message",
-                 "phx-value-id": @message.id,
-                 "data-confirm": "Are you sure?",
-                 class: ~u"absolute top-4 right-4 text-red-500 hover:text-red-800
-                           cursor-pointer opacity-0 group-hover:opacity-100
-                          transition"
-          do
-            c &icon/1, name: "hero-trash", class: ~u"h-4 w-4"
-          end
-        end
-
-        a class: ~u"flex-shrink-0 cursor-pointer",
-          "phx-click": "show-profile",
-          "phx-value-user-id": @message.user.id
-        do
-          c &user_avatar/1, class: ~u"h-10 w-10 rounded", user: @message.user
-        end
-
-        div class: ~u"ml-2" do
-          div class: ~u"-mt-1" do
-            a class: ~u"text-sm font-semibold hover:underline cursor-pointer",
-              "phx-click": "show-profile",
-              "phx-value-user-id": @message.user.id,
-              do: @message.user.username
-
-            if @timezone do
-              span class: ~u"ml-1 text-xs text-gray-500" do
-                message_timestamp(@message, @timezone)
-              end
-            end
-
-            p class: ~u"text-sm", do: @message.body
-          end
-        end
-      end
-    end
-  end
-
   attr :count, :integer, required: true
-
   defp unread_message_counter(assigns) do
     temple do
       if @count > 0 do
@@ -440,7 +401,6 @@ defmodule CcWeb.RealmsLive.Realm do
 
   attr :user, User, required: true
   attr :online, :boolean, default: false
-
   defp user(assigns) do
     temple do
       c &link/1,
@@ -462,14 +422,7 @@ defmodule CcWeb.RealmsLive.Realm do
     end
   end
 
-  defp message_timestamp(message, timezone) do
-    message.inserted_at
-    |> Timex.Timezone.convert(timezone)
-    |> Timex.format!("%-l:%M %p", :strftime)
-  end
-
   defp insert_date_dividers(messages, nil), do: messages
-
   defp insert_date_dividers(messages, timezone) do
     messages
     |> Enum.group_by(fn message ->
@@ -482,7 +435,6 @@ defmodule CcWeb.RealmsLive.Realm do
   end
 
   defp maybe_insert_unread_marker(messages, nil), do: messages
-
   defp maybe_insert_unread_marker(messages, last_read_message_id) do
     {read, unread} =
       Enum.split_while(messages, fn
@@ -580,6 +532,7 @@ defmodule CcWeb.RealmsLive.Realm do
   def handle_event("show-profile", %{"user-id" => user_id}, socket) do
     socket
     |> assign(profile: Accounts.get_user!(user_id))
+    |> assign(thread: nil)
     |> noreply()
   end
 
@@ -587,6 +540,17 @@ defmodule CcWeb.RealmsLive.Realm do
     socket
     |> assign(profile: nil)
     |> noreply()
+  end
+
+  def handle_event("show-thread", %{"id" => message_id}, socket) do
+    socket
+    |> assign(thread: Chat.get_message!(message_id))
+    |> assign(profile: nil)
+    |> noreply()
+  end
+
+  def handle_event("close-thread", _, socket) do
+    socket |> assign(:thread, nil) |> noreply()
   end
 
   def handle_event("toggle-topic", _params, socket) do

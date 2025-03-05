@@ -74,6 +74,13 @@ defmodule Cc.Chat do
     |> Repo.all()
   end
 
+  def get_message!(id) do
+    Message
+    |> where([m], m.id == ^id)
+    |> preload(:user)
+    |> Repo.one!()
+  end
+
   def create_message(room, attrs, user) do
     result =
       %Message{room: room, user: user}
