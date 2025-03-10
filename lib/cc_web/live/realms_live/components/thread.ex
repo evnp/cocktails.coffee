@@ -22,15 +22,33 @@ defmodule CcWeb.RealmsLive.Components.Thread do
         end
         div class: ~u"flex flex-col grow overflow-auto" do
           div class: ~u"border-b border-slate-300" do
-            c &message/1,
+            c &message_or_reply/1,
               in_thread?: true,
-              message: @message,
+              message_or_reply: @message,
               dom_id: "thread-message",
               current_user: @current_user,
               timezone: @timezone
           end
+
+          div id: "thread-replies", "phx-update": "stream" do
+            for {dom_id, reply} <- @streams.replies do
+              c &message_or_reply/1,
+                in_thread?: true,
+                message_or_reply: reply,
+                current_user: @current_user,
+                dom_id: dom_id,
+                timezone: @timezone
+            end
+          end
         end
       end
     end
+  end
+
+  def update(assigns, socket) do
+    socket
+    |> stream(:replies, assigns.message.replies, reset: true)
+    |> assign(assigns)
+    |> ok()
   end
 end

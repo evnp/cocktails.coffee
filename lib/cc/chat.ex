@@ -3,7 +3,7 @@ defmodule Cc.Chat do
   import Ecto.Query
 
   alias Cc.Accounts.User
-  alias Cc.Chat.{Room, Message, RoomMembership}
+  alias Cc.Chat.{Message, Reply, Room, RoomMembership}
   alias Cc.Repo
 
   @pubsub Cc.PubSub
@@ -66,24 +66,29 @@ defmodule Cc.Chat do
     |> Repo.update()
   end
 
+  defp preload_message_user_and_replies(message_query) do
+    ordered_replies_query = from r in Reply, order_by: [asc: :inserted_at, asc: :id]
+    preload(message_query, [:user, replies: ^{ordered_replies_query, [:user]}])
+  end
+
   def list_messages_in_room(%Room{id: room_id}) do
     Message
     |> where([m], m.room_id == ^room_id)
     |> order_by([m], asc: :inserted_at, asc: :id)
-    |> preload(:user)
+    |> preload_message_user_and_replies()
     |> Repo.all()
   end
 
   def get_message!(id) do
     Message
     |> where([m], m.id == ^id)
-    |> preload(:user)
+    |> preload_message_user_and_replies()
     |> Repo.one!()
   end
 
   def create_message(room, attrs, user) do
     result =
-      %Message{room: room, user: user}
+      %Message{room: room, user: user, replies: []}
       |> Message.changeset(attrs)
       |> Repo.insert()
 

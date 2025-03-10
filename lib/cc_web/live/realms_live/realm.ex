@@ -164,8 +164,8 @@ defmodule CcWeb.RealmsLive.Realm do
           for {dom_id, message_or_divider} <- @streams.messages do
             case message_or_divider do
               %Message{} ->
-                c &message/1,
-                  message: message_or_divider,
+                c &message_or_reply/1,
+                  message_or_reply: message_or_divider,
                   current_user: @current_user,
                   dom_id: dom_id,
                   timezone: @timezone

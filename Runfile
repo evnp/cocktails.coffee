@@ -38,3 +38,9 @@ install: # install dependencies
 
 reinstall: clean install # reinstall dependencies from scratch
 restart: reinstall start # restart application after reinstalling dependencies
+
+migrate: # update database schema
+  mix ecto.migrate
+
+rollback: # roll back last database migration
+  mix ecto.rollback
