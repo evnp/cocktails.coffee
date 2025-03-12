@@ -76,22 +76,27 @@ defmodule RegexFormatter do
       end
 
     Enum.reduce(matching_replacement_configs, text, fn config, text ->
-      replacements = Enum.map(config[:replacements], fn replacement ->
+      replacements = config[:replacements]
+      |> Enum.flat_map(fn replacement ->
         case replacement do
-          {search, replace} -> {search, replace, []}
-          {search, replace, options} -> {search, replace, options}
-          _ -> {
-            :error,
-            "Each entry in 'replacements' should be a 2 to 3 length tuple."
-          }
+          [_|_] -> replacement
+          [] -> replacement
+          _ -> [replacement]
+        end
+      end)
+      |> Enum.flat_map(fn replacement ->
+        case replacement do
+          {search, replace} -> [{search, replace, []}]
+          nil -> []
+          _ -> [replacement]
         end
       end)
 
-      error = Enum.find(replacements, &match?({:error, _}, &1))
-
-      if error do
-        {_, error_message} = error
-        Logger.warning("RegexFormatter.format/2: " <> error_message)
+      if not Enum.all?(replacements, &match?({_, _, _}, &1)) do
+        Logger.warning(
+          "RegexFormatter.format/2: " <>
+          "Each entry in 'replacements' should be a 2 or 3 length tuple."
+        )
         text
       else
         Enum.reduce_while(replacements, text, fn {search, replace, options}, text ->
@@ -133,11 +138,104 @@ defmodule RegexFormatter do
       end
     end)
   end
-end
 
-open_close_chars = ~w"""
-() {} [] <> "" '' || //
-"""
+  defmodule Presets do
+    defp open_close_chars do
+      ~w"""
+      () {} [] <> "" '' || //
+      """
+    end
+
+    def trim_sigil_whitespace(sigils, options \\ []) do
+      sigils |> Enum.flat_map(fn sigil ->
+        open_close_chars() |> Enum.flat_map(fn open_close ->
+          open = "\\#{String.at(open_close, 0)}"
+          close = "\\#{String.at(open_close, 1)}"
+          [
+            {
+              ~r/(~#{sigil}#{open})\s+/s,
+              ~S'\1'
+            },
+            if options[:collapse] do
+              {
+                ~r/(~#{sigil}#{open}[^#{close}]+[^#{close}\s])  +([^#{close}\s])/s,
+                ~S'\1 \2',
+                repeat: 100,
+                # Repeat substitution to correctly handle overlapping matches.
+              }
+            end,
+            {
+              ~r/(~#{sigil}#{open}[^#{close}]+[^#{close}\s])\s+#{close}/s,
+              ~S'\1"'
+            },
+          ]
+        end)
+      end)
+    end
+
+    def do_on_separate_line_after_multiline_signature() do
+      [
+        # The following regex handles cases where "do" is preceded by any number
+        # of closing braces, most commonly "] do", but also cases such as "})] do".
+        # Any amount of whitespace can precede the braces in these situations.
+        {
+          ~S'\n( *)([\]\}\)]+) do\n  ( *)',
+          ~S'\n\1\2\n\3do\n  \3'
+        },
+
+        # Following regex handles cases where a sigil is split across multiple lines, eg.
+        # div class: ~u\"this is a multiline
+        #               sigil value\"  do
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
+        # div class: ~u\"this is a multiline
+        #               sigil value\"
+        # do
+        {
+          ~s'(#{
+            open_close_chars() |> Enum.map(fn open_close ->
+              open = "\\#{String.at(open_close, 0)}"
+              close = "\\#{String.at(open_close, 1)}"
+              "\\n\\s*[^#{open}#{close}]*#{close}"
+            end)
+            |> Enum.join("|")
+          }) do\\n  ( *)',
+          ~S'\1\n\2do\n  \2'
+        },
+
+        # The following regex handles all other cases, where a keyword-list key/value
+        # is followed directly by "do"; see documentation below for details.
+        {
+          ~s'\\n( *)([^ ]+|"[^"]*"): ([^ ]+|#{
+            open_close_chars() |> Enum.map(fn open_close ->
+              open = "\\#{String.at(open_close, 0)}"
+              close = "\\#{String.at(open_close, 1)}"
+              # Optionally, handle sigil markers prior to open/close chars:
+              sigil = "(?:~(?:[a-z]|[A-Z]+))"
+              "#{sigil}?#{open}[^#{open}]*#{close}"
+            end)
+            |> Enum.join("|")
+          }) do\\n  ( *)',
+          ~S'\n\1\2: \3\n\4do\n  \4'
+        }
+        # Above regex handles unquoted or quoted keyword-list keys.
+        # Above regex handles these types of keyword-list values:
+        #
+        # unquoted    "quoted"    (parenthesized)      [bracketed]      <caretted>
+        #   ~s"quoted sigil"    ~s(parenthesized)    ~s[bracketed]    ~s<caretted>
+        # ~ABC"quoted sigil"  ~ABC(parenthesized)  ~ABC[bracketed]  ~ABC<caretted>
+        #
+        # NOTE: For performance reasons triple-quoted sigils (heredocs) aren't handled.
+        #       In practice, keyword-list use-cases for these don't appear significant.
+        #
+        # Further notes:
+        # Both regexps above look at the line following "do" to determine correct level
+        # of indentation after each "do" newline insertion. The number of spaces before
+        # "do" will always be set as 2 spaces less than the number of spaces at the
+        # start of the following line.
+      ]
+    end
+  end
+end
 
 [
   import_deps: [:ecto, :ecto_sql, :phoenix, :temple],
@@ -155,83 +253,8 @@ open_close_chars = ~w"""
     [
       extensions: [".ex", ".exs"],
       replacements: [
-        # Trim extraneous whitespace from the beginning of ~u"..." strings:
-        {
-          ~r/~u["]\s+/s,
-          "~u\""
-        },
-
-        # Collapse into single multiple spaces/newlines within ~u"..." strings:
-        {
-          ~r/(~u["][^"]+[^"\s])  +([^"\s])/s,
-          ~S'\1 \2',
-          repeat: 100, # Repeat substitution to correctly handle overlapping matches.
-        },
-
-        # Trim extraneous whitespace from the end of ~u"..." strings:
-        {
-          ~r/(~u["][^"]+[^"\s])\s+"/s,
-          ~S'\1"'
-        },
-
-        # The following regex handles cases where "do" is preceded by any number
-        # of closing braces, most commonly "] do", but also cases such as "})] do".
-        # Any amount of whitespace can precede the braces in these situations.
-        {
-          ~S'\n( *)([\]\}\)]+) do\n  ( *)',
-          ~S'\n\1\2\n\3do\n  \3'
-        },
-
-        # The following regex handles all other cases, where a keyword-list key/value
-        # is followed directly by "do"; see documentation below for details.
-        {
-          ~s'\\n( *)([^ ]+|"[^"]*"): ([^ ]+|#{
-            open_close_chars |> Enum.map(fn string ->
-              open = String.at(string, 0)
-              close = String.at(string, 1)
-              # Optionally, handle sigil markers prior to open/close chars:
-              sigil = "(?:~(?:[a-z]|[A-Z]+))"
-              "#{sigil}?\\#{open}[^\\#{open}]*\\#{close}"
-            end)
-            |> Enum.join("|")
-          }) do\\n  ( *)',
-          ~S'\n\1\2: \3\n\4do\n  \4'
-        },
-        # Above regex handles unquoted or quoted keyword-list keys.
-        # Above regex handles these types of keyword-list values:
-        #
-        # unquoted    "quoted"    (parenthesized)      [bracketed]      <caretted>
-        #   ~s"quoted sigil"    ~s(parenthesized)    ~s[bracketed]    ~s<caretted>
-        # ~ABC"quoted sigil"  ~ABC(parenthesized)  ~ABC[bracketed]  ~ABC<caretted>
-        #
-        # NOTE: For performance reasons triple-quoted sigils (heredocs) aren't handled.
-        #       In practice, keyword-list use-cases for these don't appear significant.
-        #
-        # Further notes:
-        # Both regexps above look at the line following "do" to determine correct level
-        # of indentation after each "do" newline insertion. The number of spaces before
-        # "do" will always be set as 2 spaces less than the number of spaces at the
-        # start of the following line.
-
-        # The following regex handles cases where a sigil value is split onto
-        # multiple lines, eg.
-        # div class: ~u\"this is a multiline
-        #               sigil value\"  do
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
-        # div class: ~u\"this is a multiline
-        #               sigil value\"
-        # do
-        {
-          ~s'(#{
-            open_close_chars |> Enum.map(fn string ->
-              open = String.at(string, 0)
-              close = String.at(string, 1)
-              "\\n\\s*[^\\#{open}\\#{close}]*\\#{close}"
-            end)
-            |> Enum.join("|")
-          }) do\\n  ( *)',
-          ~S'\1\n\2do\n  \2'
-        }
+        RegexFormatter.Presets.trim_sigil_whitespace([:u], collapse: true),
+        RegexFormatter.Presets.do_on_separate_line_after_multiline_signature(),
       ]
     ]
   ]
