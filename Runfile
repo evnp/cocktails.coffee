@@ -34,7 +34,6 @@ clean: # remove dependencies and build files
 
 install: # install dependencies
   mix deps.get
-  mix compile.rambo # needed for FilterFormatter package
 
 reinstall: clean install # reinstall dependencies from scratch
 restart: reinstall start # restart application after reinstalling dependencies

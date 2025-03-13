@@ -64,7 +64,8 @@ defmodule Cc.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:timex, "~> 3.7.11"},
-      {:faker, "~> 0.18", only: :dev}
+      {:faker, "~> 0.18", only: :dev},
+      {:regex_formatter, "~> 0.1", only: :dev}
     ]
   end
 
