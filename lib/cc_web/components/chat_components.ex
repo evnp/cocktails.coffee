@@ -50,10 +50,12 @@ defmodule CcWeb.ChatComponents do
           end
 
           if @current_user.id == @message_or_reply.user_id do
-            button "phx-click": "delete-message",
+            button class: ~u"text-red-500 hover:text-red-800 cursor-pointer",
+                   "phx-click": "delete-message",
                    "phx-value-id": @message_or_reply.id,
-                   "data-confirm": "Are you sure?",
-                   class: ~u"text-red-500 hover:text-red-800 cursor-pointer"
+                   "phx-value-type":
+                      @message_or_reply.__struct__ |> Module.split() |> List.last(),
+                   "data-confirm": "Are you sure?"
             do
               c &icon/1, name: "hero-trash", class: ~u"h-4 w-4"
             end

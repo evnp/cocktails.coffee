@@ -101,6 +101,7 @@ defmodule Cc.Chat do
   def delete_message(id, %User{id: user_id}) do
     # Raise MatchError if message with ID does not have correct user ID:
     message = %Message{user_id: ^user_id} = Repo.get(Message, id)
+
     result = Repo.delete(message)
 
     with {:ok, message} <- result do
@@ -111,6 +112,22 @@ defmodule Cc.Chat do
       )
 
       {:ok, message}
+    end
+  end
+
+  def delete_reply(id, %User{id: user_id}) do
+   with %Reply{} = reply <-
+           from(r in Reply, where: r.id == ^id and r.user_id == ^user_id)
+           |> Repo.one() do
+      Repo.delete(reply)
+
+      message = get_message!(reply.message_id)
+
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        room_pubsub_topic(message.room_id),
+        {:reply_deleted, message}
+      )
     end
   end
 

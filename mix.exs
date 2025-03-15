@@ -65,7 +65,7 @@ defmodule Cc.MixProject do
       {:bandit, "~> 1.5"},
       {:timex, "~> 3.7.11"},
       {:faker, "~> 0.18", only: :dev},
-      {:regex_formatter, "~> 0.1", only: :dev}
+      {:regex_formatter, "~> 0.1.3", only: :dev}
     ]
   end
 

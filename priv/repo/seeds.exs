@@ -36,7 +36,7 @@ elrond = Accounts.get_user_by_email("elrond@fellowship.me")
 aragorn = Accounts.get_user_by_email("aragorn@fellowship.me")
 boromir = Accounts.get_user_by_email("boromir@fellowship.me")
 
-shire = Repo.insert!(%Room{name: "the-shire", topic: "Bilbo's eleventy-first birthday party"})
+Repo.insert!(%Room{name: "the-shire", topic: "Bilbo's eleventy-first birthday party"})
 
 council = Repo.insert!(%Room{name: "council-of-elrond", topic: "What to do with this ring?"})
 

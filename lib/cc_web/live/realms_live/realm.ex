@@ -584,11 +584,14 @@ defmodule CcWeb.RealmsLive.Realm do
     |> noreply()
   end
 
-  def handle_event("delete-message", %{"id" => id}, socket) do
+  def handle_event("delete-message", %{"id" => id, "type" => "Message"}, socket) do
     Chat.delete_message(id, socket.assigns.current_user)
+    socket |> noreply()
+  end
 
-    socket
-    |> noreply()
+  def handle_event("delete-message", %{"id" => id, "type" => "Reply"}, socket) do
+    Chat.delete_reply(id, socket.assigns.current_user)
+    socket |> noreply()
   end
 
   def handle_event("join-room", _, socket) do
@@ -663,6 +666,21 @@ defmodule CcWeb.RealmsLive.Realm do
   def handle_info({:message_deleted, message}, socket) do
     socket
     |> stream_delete(:messages, message)
+    |> noreply()
+  end
+
+  def handle_info({:reply_deleted, message}, socket) do
+    if message.room_id == socket.assigns.room.id do
+      socket = stream_insert(socket, :messages, message)
+
+      if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
+        assign(socket, :thread, message)
+      else
+        socket
+      end
+    else
+      socket
+    end
     |> noreply()
   end
 
