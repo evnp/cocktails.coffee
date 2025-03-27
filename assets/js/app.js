@@ -25,8 +25,9 @@ import topbar from "../vendor/topbar";
 import AutoClearFlash from "./hooks/AutoClearFlash";
 import ChatMessageTextarea from "./hooks/ChatMessageTextarea";
 import RoomMessages from "./hooks/RoomMessages";
+import Thread from "./hooks/Thread";
 
-const hooks = { AutoClearFlash, ChatMessageTextarea, RoomMessages };
+const hooks = { AutoClearFlash, ChatMessageTextarea, RoomMessages, Thread };
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")

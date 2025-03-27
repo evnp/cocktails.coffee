@@ -677,7 +677,11 @@ defmodule CcWeb.RealmsLive.Realm do
   end
 
   def handle_info({:reply_created, message}, socket) do
-    socket
+    if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
+      push_event(socket, "scroll_thread_to_bottom", %{})
+    else
+      socket
+    end
     |> refresh_message(message)
     |> noreply()
   end

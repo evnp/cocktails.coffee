@@ -8,7 +8,9 @@ defmodule CcWeb.RealmsLive.Components.Thread do
 
   def render(assigns) do
     temple do
-      div class: ~u"flex flex-col shrink-0
+      div id: "thread-component",
+        "phx-hook": "Thread",
+        class: ~u"flex flex-col shrink-0
                     w-1/4 max-w-xs border-l border-slate-300 bg-slate-100"
       do
         div class: ~u"flex items-center shrink-0 h-16 px-4 shadow" do
@@ -23,7 +25,9 @@ defmodule CcWeb.RealmsLive.Components.Thread do
             c &icon/1, name: "hero-x-mark", class: ~u"w-5 h-5"
           end
         end
-        div class: ~u"flex flex-col grow overflow-auto" do
+        div id: "thread-message-with-replies",
+          class: ~u"flex flex-col grow overflow-auto"
+        do
           div class: ~u"border-b border-slate-300" do
             c &message_or_reply/1,
               in_thread?: true,
@@ -60,6 +64,7 @@ defmodule CcWeb.RealmsLive.Components.Thread do
                   rows: "1",
                   name: @form[:body].name,
                   "phx-debounce": true,
+                  "phx-hook": "ChatMessageTextarea",
                   placeholder: "Reply…",
                   class: ~u"grow text-sm px-3 border-l border-slate-300
                             mx-1 resize-none bg-slate-50"
