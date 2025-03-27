@@ -1,6 +1,9 @@
 defmodule CcWeb.RealmsLive.Components.Thread do
   use CcWeb, :live_component
 
+  alias Cc.Chat
+  alias Cc.Chat.Reply
+
   import CcWeb.ChatComponents
 
   def render(assigns) do
@@ -41,6 +44,37 @@ defmodule CcWeb.RealmsLive.Components.Thread do
             end
           end
         end
+        div class: ~u"bg-slate-100 px-4 pt-3 mt-auto" do
+          if @joined_room? do
+            div class: ~u"h-12 pb-4" do
+              c &form/1,
+                class: ~u"flex items-center border-2 border-slate-300 rounded-sm p-1",
+                for: @form,
+                id: "new-reply-form",
+                "phx-change": "validate-reply",
+                "phx-submit": "submit-reply",
+                "phx-target": @myself
+              do
+                textarea id: "thread-message-textarea",
+                  cols: "",
+                  rows: "1",
+                  name: @form[:body].name,
+                  "phx-debounce": true,
+                  placeholder: "Reply…",
+                  class: ~u"grow text-sm px-3 border-l border-slate-300
+                            mx-1 resize-none bg-slate-50"
+                do
+                  Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value)
+                end
+                button class: ~u"shrink flex items-center justify-center
+                                 h-6 w-6 rounded hover:bg-slate-200"
+                do
+                  c &icon/1, name: "hero-paper-airplane", class: ~u"h-4 w-4"
+                end
+              end
+            end
+          end
+        end
       end
     end
   end
@@ -48,7 +82,40 @@ defmodule CcWeb.RealmsLive.Components.Thread do
   def update(assigns, socket) do
     socket
     |> stream(:replies, assigns.message.replies, reset: true)
+    |> assign_form(Chat.get_reply_changeset(%Reply{}))
     |> assign(assigns)
     |> ok()
+  end
+
+  defp assign_form(socket, changeset) do
+    assign(socket, :form, to_form(changeset))
+  end
+
+  def handle_event("submit-reply", %{"reply" => message_params}, socket) do
+    %{current_user: current_user, room: room} = socket.assigns
+
+    if !Chat.joined_room?(room, current_user) do
+      raise "not allowed"
+    end
+
+    case Chat.create_reply(
+           socket.assigns.message,
+           message_params,
+           socket.assigns.current_user
+         )
+    do
+      {:ok, _message} ->
+        assign_form(socket, Chat.get_reply_changeset(%Reply{}))
+
+      {:error, changeset} ->
+        assign_form(socket, changeset)
+    end
+    |> noreply()
+  end
+
+  def handle_event("validate-reply", %{"reply" => message_params}, socket) do
+    changeset = Chat.get_reply_changeset(%Reply{}, message_params)
+
+    {:noreply, assign_form(socket, changeset)}
   end
 end

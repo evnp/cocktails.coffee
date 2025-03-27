@@ -279,6 +279,7 @@ defmodule CcWeb.RealmsLive.Realm do
           id: "thread-component",
           module: CcWeb.RealmsLive.Components.Thread,
           current_user: @current_user,
+          joined_room?: @joined_room?,
           message: @thread,
           room: @room,
           timezone: @timezone
@@ -670,6 +671,18 @@ defmodule CcWeb.RealmsLive.Realm do
   end
 
   def handle_info({:reply_deleted, message}, socket) do
+    socket
+    |> refresh_message(message)
+    |> noreply()
+  end
+
+  def handle_info({:reply_created, message}, socket) do
+    socket
+    |> refresh_message(message)
+    |> noreply()
+  end
+
+  defp refresh_message(socket, message) do
     if message.room_id == socket.assigns.room.id do
       socket = stream_insert(socket, :messages, message)
 
@@ -681,7 +694,6 @@ defmodule CcWeb.RealmsLive.Realm do
     else
       socket
     end
-    |> noreply()
   end
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do

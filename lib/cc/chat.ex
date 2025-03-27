@@ -116,7 +116,7 @@ defmodule Cc.Chat do
   end
 
   def delete_reply(id, %User{id: user_id}) do
-   with %Reply{} = reply <-
+    with %Reply{} = reply <-
            from(r in Reply, where: r.id == ^id and r.user_id == ^user_id)
            |> Repo.one() do
       Repo.delete(reply)
@@ -128,7 +128,30 @@ defmodule Cc.Chat do
         room_pubsub_topic(message.room_id),
         {:reply_deleted, message}
       )
+
+      {:ok, message}
     end
+  end
+
+  def create_reply(%Message{} = message, attrs, user) do
+    with {:ok, reply} <-
+           %Reply{message: message, user: user}
+           |> Reply.changeset(attrs)
+           |> Repo.insert() do
+      message = get_message!(reply.message_id)
+
+      Phoenix.PubSub.broadcast!(
+        @pubsub,
+        room_pubsub_topic(message.room_id),
+        {:reply_created, message}
+      )
+
+      {:ok, reply}
+    end
+  end
+
+  def get_reply_changeset(reply, attrs \\ %{}) do
+    Reply.changeset(reply, attrs)
   end
 
   def get_room_changeset(room, attrs \\ %{}) do
