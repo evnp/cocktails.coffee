@@ -35,29 +35,31 @@ defmodule CcWeb.ChatComponents do
   def message_or_reply(assigns) do
     temple do
       div id: @dom_id, class: ~u"group relative flex px-4 py-3" do
-        div class: ~u"absolute top-4 right-4 hidden group-hover:block bg-white gap-1
-                        shadow-sm px-2 pb-1 rounded border border-px border-slate-300"
-        do
-          if !@in_thread? do
-            button "phx-click": "show-thread",
-                   "phx-value-id": @message_or_reply.id,
-                   class: ~u"text-slate-500 hover:text-slate-600 cursor-pointer"
-            do
-              c &icon/1,
-                name: "hero-chat-bubble-bottom-center-text",
-                class: ~u"h-4 w-4"
+        if !@in_thread? or @current_user.id == @message_or_reply.user_id do
+          div class: ~u"absolute top-4 right-4 hidden group-hover:block bg-white gap-1
+                          shadow-sm px-2 pb-1 rounded border border-px border-slate-300"
+          do
+            if !@in_thread? do
+              button "phx-click": "show-thread",
+                     "phx-value-id": @message_or_reply.id,
+                     class: ~u"text-slate-500 hover:text-slate-600 cursor-pointer"
+              do
+                c &icon/1,
+                  name: "hero-chat-bubble-bottom-center-text",
+                  class: ~u"h-4 w-4"
+              end
             end
-          end
 
-          if @current_user.id == @message_or_reply.user_id do
-            button class: ~u"text-red-500 hover:text-red-800 cursor-pointer",
-                   "phx-click": "delete-message",
-                   "phx-value-id": @message_or_reply.id,
-                   "phx-value-type":
-                      @message_or_reply.__struct__ |> Module.split() |> List.last(),
-                   "data-confirm": "Are you sure?"
-            do
-              c &icon/1, name: "hero-trash", class: ~u"h-4 w-4"
+            if @current_user.id == @message_or_reply.user_id do
+              button class: ~u"text-red-500 hover:text-red-800 cursor-pointer",
+                     "phx-click": "delete-message",
+                     "phx-value-id": @message_or_reply.id,
+                     "phx-value-type":
+                        @message_or_reply.__struct__ |> Module.split() |> List.last(),
+                     "data-confirm": "Are you sure?"
+              do
+                c &icon/1, name: "hero-trash", class: ~u"h-4 w-4"
+              end
             end
           end
         end
